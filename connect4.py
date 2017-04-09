@@ -364,7 +364,7 @@ class Gui():
         elif ime == 'hard':
             self.igralec_r = Racunalnik(self, Minimax(5))
         else:
-            self.igralec_r = Racunalnik(self, rand_alg()
+            self.igralec_r = Racunalnik(self, rand_alg())
         self.zacni_igro(nova=True)
 
     def nastavi_rumenega(self, ime):

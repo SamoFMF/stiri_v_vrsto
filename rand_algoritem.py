@@ -36,5 +36,4 @@ class rand_alg():
 
     def rand_algoritem(self):
         poteze = self.igra.veljavne_poteze()
-        stevilo = int(random.random() * len(poteze))
-        return poteze[stevilo]
+        return random.choice(poteze)
