@@ -56,21 +56,14 @@ class Minimax:
             #if isinstance(self.igra, five_logika):
             if 3 > 5:
                 # TODO
+                stirke_R = self.igra.stirke_R
+                stirke_Y = self.igra.stirke_Y
+                petke = self.igra.petke
                 tocke = [0, 0]
                 pass
             else:
                 # Imamo normalno ali popout igro, torej so štirke definirane sledeče
-                stirke = []
-                for i in range(7):
-                    for j in range(3): # Navpične
-                        stirke.append([(i,j), (i,j+1), (i,j+2), (i,j+3)])
-                    if i < 4: # 4 = 7 - 3, 3 mesta še naprej za 4ko
-                        for j in range(6): # 6 vrstic
-                            stirke.append([(i,j), (i+1,j), (i+2, j), (i+3, j)]) # Vodoravne
-                            if j < 3: # Diagonalne desno gor
-                                stirke.append([(i,j), (i+1,j+1), (i+2,j+2), (i+3,j+3)])
-                            if j > 2: # Diagonalne desno dol
-                                stirke.append([(i,j), (i+1,j-1), (i+2,j-2), (i+3,j-3)])
+                stirke = self.igra.stirke
                 # Pojdimo sedaj skozi vse možne zmagovalne štirke in jih
                 # primerno ovrednotimo
                 # Stirke, ki ze vsebujejo zetone obeh igralec so vredne 0 tock
