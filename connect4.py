@@ -8,6 +8,7 @@ from rand_algoritem import *
 from minimax import *
 from pop_logika import *
 from five_logika import *
+import random
 
 #########################
 ## UPORABNIŠKI VMESNIK ##
@@ -338,6 +339,13 @@ class Gui():
                                 tag=Gui.TAG_FIGURA)
 
     def naslednja_igra(self):
+        
+        self.prvi=random.choice([1,2])
+        if self.prvi%2==0:
+            self.na_potezi = self.igralec_r
+        if self.prvi%2==1:
+            self.na_potezi = self.igralec_y
+            
         if self.igra.na_potezi is None:
             (zmagovalec, stirka) = self.igra.stanje_igre()
             if zmagovalec == IGRALEC_R:
@@ -369,6 +377,13 @@ class Gui():
         self.naslednja_igra()
 
     def nova_igra(self):
+        
+        self.prvi=random.choice([1,2])
+        if self.prvi%2==0:
+            self.na_potezi = self.igralec_r
+        if self.prvi%2==1:
+            self.na_potezi = self.igralec_y
+            
         self.rezultat = [0, 0]
         self.zacni_igro()
 

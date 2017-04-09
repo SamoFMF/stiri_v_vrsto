@@ -5,6 +5,7 @@
 ##from norm_logika import *
 ##from pop_logika import *
 ##from five_logika import *
+import random
 
 IGRALEC_R = 1 # Igralec, ki ima rdeče krogce
 IGRALEC_Y = 2 # Igralec, ki ima rumene krogce
@@ -49,8 +50,12 @@ class Igra():
         # Ustvarimo seznam trenutne pozicije
         self.polozaj = [[PRAZNO]*6 for i in range(7)]
 
-        # Na potezi je rdeči
-        self.na_potezi = IGRALEC_R
+        # Prvi na potezi je naključni igralec.
+        x=random.choice([1,2])
+        if x%2==0:
+            self.na_potezi = IGRALEC_R
+        if x%2==1:
+            self.na_potezi = IGRALEC_Y
 
         # Shranjujmo si zgodovino, da lahko uporabimo 'undo'
         self.zgodovina = []
