@@ -30,11 +30,12 @@ class Racunalnik():
         '''Vsakih 100ms preveri, če je algoritem že izračunal potezo.'''
         if self.algoritem.poteza:
             # Algoritem je našel potezo
-            # Če ni bilo prekinitve, povleci potezo
-            self.gui.povleci_potezo(self.algoritem.poteza)
 
             # Vzporedno vlakno ni več aktivno, zato ga pozabimo
             self.mislec = None
+            
+            # Če ni bilo prekinitve, povleci potezo
+            self.gui.povleci_potezo(self.algoritem.poteza)
         else:
             # Algoritem še ni našel poteze, čez 100ms naj ponovno preveri
             self.gui.platno.after(100, self.preveri_potezo)

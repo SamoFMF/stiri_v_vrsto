@@ -8,7 +8,6 @@ from rand_algoritem import *
 from minimax import *
 from pop_logika import *
 from five_logika import *
-import random
 
 #########################
 ## UPORABNIŠKI VMESNIK ##
@@ -76,25 +75,33 @@ class Gui():
         menu_uredi.add_command(label='Razveljavi', command=self.platno_razveljavi)
         menu_uredi.add_command(label='Uveljavi', command=self.platno_uveljavi)
 
-        # Podmenu "Igralec 1"
-        menu_igralec1 = tkinter.Menu(menu)
-        menu.add_cascade(label='Igralec 1', menu=menu_igralec1)
-        menu_igralec1.add_command(label='Človek',
-                                  command=lambda: self.nastavi_igralca1('clovek'))
-        menu_igralec1.add_command(label='Računalnik',
-                                  command=lambda: self.nastavi_igralca1('racunalnik'))
+        # Podmenu "Rdeči"
+        menu_rdeci = tkinter.Menu(menu)
+        menu.add_cascade(label='Rdeči', menu=menu_rdeci)
+        menu_rdeci.add_command(label='Človek',
+                                  command=lambda: self.nastavi_rdecega('clovek'))
+        menu_rdeci.add_command(label='Računalnik - naključen',
+                                  command=lambda: self.nastavi_rdecega('rand'))
+        menu_rdeci.add_command(label='Računalnik - lahek',
+                                  command=lambda: self.nastavi_rdecega('easy'))
+        menu_rdeci.add_command(label='Računalnik - srednji',
+                                  command=lambda: self.nastavi_rdecega('med'))
+        menu_rdeci.add_command(label='Računalnik - zahteven',
+                                  command=lambda: self.nastavi_rdecega('hard'))
 
-        # Podmenu "Igralec 2"
-        menu_igralec2 = tkinter.Menu(menu)
-        menu.add_cascade(label='Igralec 2', menu=menu_igralec2)
-        menu_igralec2.add_command(label='Človek',
-                                  command=lambda: self.nastavi_igralca2('clovek'))
-        menu_igralec2.add_command(label='Računalnik',
-                                  command=lambda: self.nastavi_igralca2('racunalnik'))
-
-##        # Napis, ki prikazuje stanje igre
-##        self.napis = tkinter.StringVar(master, value='Dobrodošli v 4 v vrsto!')
-##        tkinter.Label(master, textvariable=self.napis).pack()
+        # Podmenu "Rumeni"
+        menu_rumeni = tkinter.Menu(menu)
+        menu.add_cascade(label='Rumeni', menu=menu_rumeni)
+        menu_rumeni.add_command(label='Človek',
+                                  command=lambda: self.nastavi_rumenega('clovek'))
+        menu_rumeni.add_command(label='Računalnik -  naključen',
+                                  command=lambda: self.nastavi_rumenega('rand'))
+        menu_rumeni.add_command(label='Računalnik -  lahek',
+                                  command=lambda: self.nastavi_rumenega('easy'))
+        menu_rumeni.add_command(label='Računalnik -  srednji',
+                                  command=lambda: self.nastavi_rumenega('med'))
+        menu_rumeni.add_command(label='Računalnik -  tezek',
+                                  command=lambda: self.nastavi_rumenega('hard'))
 
         ###############################################################
         ###############################################################
@@ -347,22 +354,30 @@ class Gui():
                 self.rezultat[1] += 1
         self.zacni_igro()
 
-    def nastavi_igralca1(self, ime):
+    def nastavi_rdecega(self, ime):
         if ime == 'clovek':
-            self.igralec_r = None
-        else:
-            # Tukaj je še potrebno nastaviti, da se bo izbral željen algoritem
-            # TODO
+            self.igralec_r = Clovek(self)
+        elif ime == 'easy':
+            self.igralec_r = Racunalnik(self, Minimax(2))
+        elif ime == 'med':
             self.igralec_r = Racunalnik(self, Minimax(4))
+        elif ime == 'hard':
+            self.igralec_r = Racunalnik(self, Minimax(5))
+        else:
+            self.igralec_r = Racunalnik(self, rand_alg()
         self.zacni_igro(nova=True)
 
-    def nastavi_igralca2(self, ime):
+    def nastavi_rumenega(self, ime):
         if ime == 'clovek':
-            self.igralec_y = None
-        else:
-            # Tukaj je še potrebno nastaviti, da se bo izbral željen algoritem
-            # TODO
+            self.igralec_y = Clovek(self)
+        elif ime == 'easy':
+            self.igralec_y = Racunalnik(self, Minimax(2))
+        elif ime == 'med':
             self.igralec_y = Racunalnik(self, Minimax(4))
+        elif ime == 'hard':
+            self.igralec_y = Racunalnik(self, Minimax(5))
+        else:
+            self.igralec_y = Racunalnik(self, rand_alg())
         self.zacni_igro(nova=True)
 
     def nastavi_tip(self, ime):
@@ -588,9 +603,11 @@ class Gui():
         # Dodamo spremenljive elemente v platno_menu
         self.narisi_platno_menu()
         
-        # Rdeči je prvi na potezi
-        #self.napis.set('Na potezi je RDEČI.')
-        self.igralec_r.igraj()
+        # Preverimo, kdo je na potezi
+        if self.igra.na_potezi == IGRALEC_R:
+            self.igralec_r.igraj()
+        elif self.igra.na_potezi == IGRALEC_Y:
+            self.igralec_y.igraj()
 
     def zapri_okno(self, master):
         '''Ta metoda se pokliče, ko uporabnik zapre aplikacijo.'''
