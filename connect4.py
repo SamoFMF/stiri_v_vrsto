@@ -194,16 +194,26 @@ class Gui():
 
         # Narišemo figure za platno_menu
         # Najprej nespremenljiv del
-        self.platno_menu.create_text(10, 10, text='Rdeči',
-                                     fill='red', anchor=tkinter.NW,
-                                     font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/10)),
-                                           'bold'))
-        self.platno_menu.create_text(Gui.SIRINA_PLATNO_MENU-10, 10,
-                                     text='Rumeni', fill='yellow',
-                                     anchor=tkinter.NE,
-                                     font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/10)),
-                                           'bold'))
+        dy = Gui.VISINA_PLATNO_MENU / 30
+        dx = 0.18 * Gui.VISINA_PLATNO_MENU
 
+        self.e1 = tkinter.Entry(master, fg='Red', bg='Black',
+                                font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/12)),
+                                           'bold'),
+                                width='8', borderwidth='0', justify='center')
+                                    
+        self.e2 = tkinter.Entry(master, bg='Black', fg='yellow',
+                                font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/12)),
+                                           'bold'),
+                                width='8', borderwidth='0', justify='center')
+
+        self.e1.insert(0, 'Rdeči')
+        self.e2.insert(0, 'Rumeni')
+        
+        self.platno_menu.create_window(5, 10+dy, anchor=tkinter.NW, window=self.e1)
+        
+        self.platno_menu.create_window(Gui.SIRINA_PLATNO_MENU-5, 10+dy, anchor=tkinter.NE, window=self.e2)
+        
         # Pričnemo igro
         self.zacni_igro(nova=True)
 
