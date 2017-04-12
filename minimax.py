@@ -133,11 +133,7 @@ class Minimax:
                             vrednost_najboljse = vrednost
                         elif vrednost == vrednost_najboljse:
                             sez_naj_potez.append(p)
-                    if len(sez_naj_potez) == 1:
-                        najboljsa_poteza = sez_naj_potez[0]
-                    elif len(sez_naj_potez) > 1:
-                        rand_st = int(random.random() * len(sez_naj_potez))
-                        najboljsa_poteza = sez_naj_potez[rand_st]
+                    najboljsa_poteza = random.choice(sez_naj_potez)
                 else:
                     # Minimiziramo
                     najboljsa_poteza = None
@@ -152,11 +148,7 @@ class Minimax:
                             vrednost_najboljse = vrednost
                         elif vrednost == vrednost_najboljse:
                             sez_naj_potez.append(p)
-                    if len(sez_naj_potez) == 1:
-                        najboljsa_poteza = sez_naj_potez[0]
-                    elif len(sez_naj_potez) > 1:
-                        rand_st = int(random.random() * len(sez_naj_potez))
-                        najboljsa_poteza = sez_naj_potez[rand_st]
+                    najboljsa_poteza = random.choice(sez_naj_potez)
                 assert (najboljsa_poteza is not None), 'minimax: izračunana poteza je None'
                 return (najboljsa_poteza, vrednost_najboljse)
         else:
