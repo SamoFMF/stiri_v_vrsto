@@ -243,20 +243,6 @@ class Gui():
                                     15*d/2, d/2 + i*d,
                                     tag=Gui.TAG_OKVIR)
 
-        for i in range(6):
-            barva1 = 'yellow' if i%2 == 0 else 'red'
-            barva2 = 'red' if i%2 == 0 else 'yellow'
-            self.platno.create_line(d/4, d/2 + d/4 + i*d,
-                                    d/4, d/2 + 3*d/4 + i*d,
-                                    tag=Gui.TAG_OKVIR,
-                                    fill=barva1,
-                                    width=5)
-            self.platno.create_line(8*d - d/4, d/2 + d/4 + i*d,
-                                    8*d - d/4, d/2 + 3*d/4 + i*d,
-                                    tag=Gui.TAG_OKVIR,
-                                    fill=barva2,
-                                    width=5)
-
     def narisi_R(self, p):
         d = self.VELIKOST_POLJA
         x = (p[0] + 1) * d
@@ -343,6 +329,26 @@ class Gui():
                     self.narisi_R((i,j))
                 elif b == IGRALEC_Y:
                     self.narisi_Y((i,j))
+
+        if isinstance(self.igra, five_logika):
+            self.narisi_crtice()
+
+    def narisi_crtice(self):
+        # Pomožne črte za 5 v vrsto
+        d = self.VELIKOST_POLJA
+        for i in range(6):
+            barva1 = 'yellow' if i%2 == 0 else 'red'
+            barva2 = 'red' if i%2 == 0 else 'yellow'
+            self.platno.create_line(d/4, d/2 + d/4 + i*d,
+                                    d/4, d/2 + 3*d/4 + i*d,
+                                    tag=Gui.TAG_FIGURA,
+                                    fill=barva1,
+                                    width=5)
+            self.platno.create_line(8*d - d/4, d/2 + d/4 + i*d,
+                                    8*d - d/4, d/2 + 3*d/4 + i*d,
+                                    tag=Gui.TAG_FIGURA,
+                                    fill=barva2,
+                                    width=5)
 
     def narisi_Y(self, p):
         d = self.VELIKOST_POLJA
@@ -473,7 +479,26 @@ class Gui():
         '''Razveljavimo zadnjo potezo in prikažemo prejšnje stanje.'''
 
         # Razveljavimo prejšnjo potezo
-        novo_stanje = self.igra.razveljavi()
+        if isinstance(self.igralec_r, Racunalnik):
+            if self.igra.na_potezi == IGRALEC_R:
+                # Na potezi računalnik, ne naredi ničesar
+                return
+            elif self.igra.na_potezi == IGRALEC_Y:
+                novo_stanje = self.igra.razveljavi(2)
+            else:
+                # Igre je konec
+                novo_stanje = self.igra.razveljavi(2)
+        elif isinstance(self.igralec_y, Racunalnik):
+            if self.igra.na_potezi == IGRALEC_Y:
+                # Na potezi računalnik, ne naredi ničesar
+                return
+            elif self.igra.na_potezi == IGRALEC_R:
+                novo_stanje = self.igra.razveljavi(2)
+            else:
+                # TODO
+                novo_stanje = self.igra.razveljavi(2)
+        else:
+            novo_stanje = self.igra.razveljavi()
 
         if novo_stanje: # Uspešno smo razveljavili potezo
             # Pobrišemo vse figure iz igralne površine        
@@ -609,6 +634,9 @@ class Gui():
             self.igra = five_logika()
         else:
             self.igra = pop_logika()
+
+        if isinstance(self.igra, five_logika):
+            self.narisi_crtice()
 
         # Dodamo spremenljive elemente v platno_menu
         self.narisi_platno_menu()

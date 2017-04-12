@@ -73,3 +73,12 @@ class five_logika(Igra):
             # Če pridemo do sem, so vsa polja zasedena in ni več veljavnih potez
             # Pravtako tudi zmagovalca ni, torej je rezultat neodločen
             return (NEODLOCENO, None)
+
+    def kopija(self):
+        '''Vrni kopijo te igre, brez zgodovine.'''
+        # Potrebujemo, da se ne rišejo poteze, ko računalnik razmišlja
+        k = five_logika()
+        k.polozaj = [self.polozaj[i][:] for i in range(7)]
+        k.na_potezi = self.na_potezi
+        return k
+        

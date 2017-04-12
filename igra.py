@@ -125,11 +125,11 @@ class Igra():
         self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
         return (zmagovalec, stirka, (k,j) if p<0 else (p-1,j), je_popout)
 
-    def razveljavi(self):
+    def razveljavi(self, i=1):
         '''Razveljavi potezo in se vrne v prejšnje stanje.'''
-        if self.stevec > 0:
-            (self.polozaj, self.na_potezi) = self.zgodovina[self.stevec-1]
-            self.stevec -= 1
+        if self.stevec > i-1:
+            (self.polozaj, self.na_potezi) = self.zgodovina[self.stevec-i]
+            self.stevec -= i
             return (self.polozaj, self.na_potezi)
         else:
             return None

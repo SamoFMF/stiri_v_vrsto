@@ -1,6 +1,7 @@
 import logging
 
 from igra import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik, NEVELJAVNO
+from five_logika import five_logika
 import random
 
 #######################
@@ -53,14 +54,62 @@ class Minimax:
             return vrednost
         else:
             # Najprej preverimo ker tip igre imamo
-            #if isinstance(self.igra, five_logika):
-            if 3 > 5:
-                # TODO
+            if isinstance(self.igra, five_logika):
+                # Imamo 5 v vrsto, torej imamo zmagovalne štirke (robne)
+                # ter petke, pokličimo jih spodaj
                 stirke_R = self.igra.stirke_R
                 stirke_Y = self.igra.stirke_Y
                 petke = self.igra.petke
-                tocke = [0, 0]
-                pass
+
+                # Pojdimo skozi vse štirke & petke ter jih primerno ovrednotimo
+                # Štirke / petke, ki vsebujejo žetone obeh igralcev so vredne 0 točk
+                # Prazne petke so vredne 0.1 točke
+                # Štirke so vredne 0.2 + a/5 točke, kjer je a število žetonov v štirki,
+                # če je igralec pravilne barve za to štirko.
+                # Petke so vredne a/5 točke, kjer je a število žetonov v petki.
+                tocke = [0, 0] # Sem bomo shranili število točk igralcev [R,Y]
+
+                for s in stirke_R: # Štirke na voljo rdečemu
+                    ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
+                    stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
+                             self.igra.polozaj[i3][j3], self.igra.polozaj[i4][j4]]
+                    if IGRALEC_Y in stirka:
+                        continue
+                    else:
+                        tocke[0] += 0.2 + stirka.count(IGRALEC_R) / 5
+                for s in stirke_Y: # Štirke na voljo rumenemu
+                    ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
+                    stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
+                             self.igra.polozaj[i3][j3], self.igra.polozaj[i4][j4]]
+                    if IGRALEC_R in stirka:
+                        continue
+                    else:
+                        tocke[1] += 0.2 + stirka.count(IGRALEC_Y) / 5
+
+                for p in petke:
+                    ((i1,j1),(i2,j2),(i3,j3),(i4,j4),(i5,j5)) = p
+                    petka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
+                             self.igra.polozaj[i3][j3], self.igra.polozaj[i4][j4],
+                             self.igra.polozaj[i5][j5]]
+                    barve = list(set(stirka))
+                    if len(barve) == 2:
+                        if PRAZNO in barve:
+                            # V petki so žetoni samo 1 barve
+                            b = list(set(barve) - set([PRAZNO]))[0]
+                            if b == IGRALEC_R:
+                                tocke[0] += petka.count(b) / 5
+                            else:
+                                tocke[1] += petka.count(b) / 5
+                        else:
+                            # V petki so rdeči in rumeni
+                            continue
+                    elif barve == [PRAZNO]:
+                        # Petka je prazna
+                        tocke[0] += 0.1
+                        tocke[1] += 0.1
+                    else:
+                        # V petki so rumeni in rdeči žetoni
+                        continue
             else:
                 # Imamo normalno ali popout igro, torej so štirke definirane sledeče
                 stirke = self.igra.stirke
@@ -73,7 +122,7 @@ class Minimax:
                 for s in stirke:
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                     stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
-                             self.igra.polozaj[i3][j4], self.igra.polozaj[i4][j4]]
+                             self.igra.polozaj[i3][j3], self.igra.polozaj[i4][j4]]
                     barve = list(set(stirka))
                     # barve bo dolžine 2 ali 3, če bi bilo dolžine 1,
                     # bi bilo igre že konec
@@ -87,8 +136,14 @@ class Minimax:
                                 tocke[1] += stirka.count(b) / 4
                         else:
                             continue
+                    elif barve == [PRAZNO]:
+                        # Štirka je prazna
+                        tocke[0] += 0.1
+                        tocke[1] += 0.1
                     else:
+                        # V štirki so rumene in rdeče
                         continue
+                    
             (dos1, dos2) = tocke
             if self.igra.na_potezi == IGRALEC_R:
                 vrednost += (dos1 - dos2) / 69 * 0.1 * Minimax.ZMAGA
