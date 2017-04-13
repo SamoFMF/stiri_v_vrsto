@@ -149,54 +149,29 @@ class Gui():
                                           width=Gui.SIRINA_PLATNO_MENU,
                                           height=Gui.VISINA_PLATNO_MENU)
         self.platno_menu.config(bg='black') # Za čas testiranja
-        self.platno_menu.grid(row=0, column=0, columnspan=7, sticky=tkinter.NW)
+        self.platno_menu.grid(row=0, column=0, sticky=tkinter.NW)
 
         # Dodamo možnosti
         self.gumb_nova_igra = tkinter.Button(self.frame1, text='Nova igra',
                                              width=int(0.4*MIN_SIRINA/7.25),
                                              command=lambda: self.zacni_igro(nova=True))
-        self.gumb_nova_igra.grid(row=2, column=2, columnspan=3)
+        self.gumb_nova_igra.grid(row=1, column=0, pady=5)
         self.gumb_naslednja_igra = tkinter.Button(self.frame1, text='Naslednja igra',
                                                   width=int(0.4*MIN_SIRINA/7.25),
                                                   command=self.naslednja_igra)
-        self.gumb_naslednja_igra.grid(row=4, column=2, columnspan=3)
+        self.gumb_naslednja_igra.grid(row=2, column=0, pady=5)
         self.gumb_razveljavi = tkinter.Button(self.frame1, text='Razveljavi',
                                               width=int(0.4*MIN_SIRINA/7.25),
                                               command=self.platno_razveljavi)
-        self.gumb_razveljavi.grid(row=6, column=2, columnspan=3)
+        self.gumb_razveljavi.grid(row=3, column=0, pady=(20,5))
         self.gumb_uveljavi = tkinter.Button(self.frame1, text='Uveljavi',
                                             width=int(0.4*MIN_SIRINA/7.25),
                                             command=self.platno_uveljavi)
-        self.gumb_uveljavi.grid(row=8, column=2, columnspan=3)
-        self.gumb_nazaj = tkinter.Button(self.frame1, text='Nazaj',
-                                         width=int(0.3*0.8*MIN_SIRINA/7.25),
-                                         command=self.pojdi_nazaj)
-        self.gumb_nazaj.grid(row=10, column=1, columnspan=2)
+        self.gumb_uveljavi.grid(row=4, column=0, pady=5)
         self.gumb_izhod = tkinter.Button(self.frame1, text='Izhod',
                                          width=int(0.3*0.8*MIN_SIRINA/7.25),
                                          command=lambda: self.zapri_okno(master))
-        self.gumb_izhod.grid(row=10, column=4, columnspan=2)
-
-        # Nastavimo velikosti vrstic in stolpcev za željen izgled
-        (col_n, row_n) = self.frame1.grid_size()
-        for col in range(col_n):
-            z = 0.8 * MIN_SIRINA
-            a = 0.1 * z
-            if col % (col_n-1) == 0:
-                self.frame1.grid_columnconfigure(col, minsize=a)
-            elif col in [1, 2, 4, 5]:
-                self.frame1.grid_columnconfigure(col, minsize=(z/4-a))
-            else:
-                self.frame1.grid_columnconfigure(col, minsize=(2*a))
-
-        for row in range(row_n):
-            x = (0.45*MIN_VISINA-100)/30
-            if row in [1, 3, 7]:
-                self.frame1.grid_rowconfigure(row, minsize=x)
-            elif row == 5:
-                self.frame1.grid_rowconfigure(row, minsize=(4*x))
-            elif row == 9:
-                self.frame1.grid_rowconfigure(row, minsize=(8*x))
+        self.gumb_izhod.grid(row=5, column=0, pady=(30,5))
 
         # Narišemo figure za platno_menu
         # Najprej nespremenljiv del
