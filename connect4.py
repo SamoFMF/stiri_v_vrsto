@@ -48,6 +48,12 @@ class Gui():
         self.VELIKOST_POLJA = ZVP # Velikost polja
         self.VELIKOST_GAP = self.VELIKOST_POLJA / 20 # Razdalja med okvirjem in figuro
         self.rezultat = [0, 0] # Trenutni rezultat
+
+        self.kaksen_igralec = {'clovek': Clovek(self),
+                               'easy': Racunalnik(self, Minimax(2)),
+                               'med': Racunalnik(self, Minimax(4)),
+                               'hard': Racunalnik(self, Minimax(5)),
+                               'rand': Racunalnik(self, rand_alg())}
         
         # Če uporabnik zapre okno, naj se pokliče self.zapri_okno
         master.protocol('WM_DELETE_WINDOW', lambda: self.zapri_okno(master))
@@ -371,29 +377,11 @@ class Gui():
         self.zacni_igro()
 
     def nastavi_rdecega(self, ime):
-        if ime == 'clovek':
-            self.igralec_r = Clovek(self)
-        elif ime == 'easy':
-            self.igralec_r = Racunalnik(self, Minimax(2))
-        elif ime == 'med':
-            self.igralec_r = Racunalnik(self, Minimax(4))
-        elif ime == 'hard':
-            self.igralec_r = Racunalnik(self, Minimax(5))
-        else:
-            self.igralec_r = Racunalnik(self, rand_alg())
+        self.igralec_r = self.kaksen_igralec[ime]
         self.zacni_igro(nova=True)
 
     def nastavi_rumenega(self, ime):
-        if ime == 'clovek':
-            self.igralec_y = Clovek(self)
-        elif ime == 'easy':
-            self.igralec_y = Racunalnik(self, Minimax(2))
-        elif ime == 'med':
-            self.igralec_y = Racunalnik(self, Minimax(4))
-        elif ime == 'hard':
-            self.igralec_y = Racunalnik(self, Minimax(5))
-        else:
-            self.igralec_y = Racunalnik(self, rand_alg())
+        self.igralec_y = self.kaksen_igralec[ime]
         self.zacni_igro(nova=True)
 
     def nastavi_tip(self, ime):
