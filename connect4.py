@@ -470,7 +470,7 @@ class Gui():
             if self.igra.na_potezi == IGRALEC_R:
                 self.igralec_r.klik(i)
             elif self.igra.na_potezi == IGRALEC_Y:
-                self.igralec_r.klik(i)
+                self.igralec_y.klik(i)
             else:
                 # Nihče ni na potezi
                 pass
