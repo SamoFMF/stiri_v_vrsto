@@ -33,18 +33,47 @@ class AlphaBeta:
 
         # Poženemo alphabeta
         (poteza, vrednost) = self.alphabeta(self.globina, -AlphaBeta.NESKONCNO, AlphaBeta.NESKONCNO, True)
-        print('poteza = {0}, vrednost = {1}'.format(poteza, vrednost))
+        print('igralec = {2}, poteza = {0}, vrednost = {1}'.format(poteza, vrednost, self.jaz))
         self.jaz = None
         self.igra = None
         if not self.prekinitev:
             # Nismo bili prekinjeni, torej potezo izvedemo
             self.poteza = poteza
 
+    def uredi_poteze(self, poteze):
+        '''Uredi seznam potez, ki ga nato uporabimo v alphabeta.'''
+        urejene_poteze = [] # Urejen seznam potez
+        if isinstance(self.igra, five_logika):
+            # Imamo 5 v vrsto
+            zeljen_vrstni_red = [1,-1,4,-4,7,-7] # Željen vrstni red, če so na voljo vse poteze
+            zeljen_vrstni_red = random.sample(zeljen_vrstni_red, 6)
+            for i in range(1,3):
+                dodajamo = [4-i,-4+i,4+i,-4-i] # Poteze, ki jih želimo dodati
+                dodajamo = random.sample(dodajamo, 4)
+                for j in dodajamo:
+                    zeljen_vrstni_red.append(j)
+        else:
+            # Imamo 4 v vrsto ali Pop Out
+            zeljen_vrstni_red = [4,-4] # Željen vrstni red, če so na voljo vse poteze
+            for i in range(1,4):
+                dodajamo = [4-i,-4+i,4+i,-4-i] # Poteze, ki jih želimo dodati
+                dodajamo = random.sample(dodajamo, 4)
+                for j in dodajamo:
+                    zeljen_vrstni_red.append(j)
+        for i in zeljen_vrstni_red:
+            if i in poteze:
+                # Poteza je na voljo, treba jo je dodati
+                urejene_poteze.append(i)
+            else:
+                # Poteza ni na voljo
+                continue
+        return urejene_poteze
+
     # Vrednosti igre
     ZMAGA = 10**5
     NESKONCNO = ZMAGA + 1 # Več kot zmaga
 
-    def vrednost_pozicije(self, igralec):
+    def vrednost_pozicije(self):
         '''Ocena vrednosti polozaja.'''
         vrednost = 0
         if self.igra is None:
@@ -52,13 +81,8 @@ class AlphaBeta:
             return vrednost
         elif self.igra.na_potezi is None:
             # Igre je konec
-            (zmagovalec, stirka) = self.igra.stanje_igre()
-            if zmagovalec == igralec:
-                return AlphaBeta.ZMAGA
-            elif zmagovalec == NEODLOCENO:
-                return 0
-            else:
-                return -AlphaBeta.ZMAGA
+            # Sem ne bi smeli nikoli priti zaradi if stavkov v alphabeta
+            return vrednost
         else:
             a = 0.8 # Faktor za katerega mu je izguba manj vredna kot dobiček
             # Najprej preverimo ker tip igre imamo
@@ -159,7 +183,7 @@ class AlphaBeta:
                         continue
                     
             (dos1, dos2) = tocke
-            if self.igra.na_potezi == IGRALEC_R:
+            if self.jaz == IGRALEC_R:
                 vrednost += (dos1 - dos2) / 69 * 0.1 * AlphaBeta.ZMAGA
             else:
                 vrednost += (dos2 - dos1) / 69 * 0.1 * AlphaBeta.ZMAGA
@@ -186,14 +210,14 @@ class AlphaBeta:
             # Igre ni konec
             igralec = self.igra.na_potezi
             if globina == 0:
-                return (None, self.vrednost_pozicije(igralec))
+                return (None, self.vrednost_pozicije())
             else:
                 # Naredimo en korak alphabeta metode
                 if maksimiziramo:
                     # Maksimiziramo
                     najboljsa_poteza = None
                     vrednost_najboljse = -AlphaBeta.NESKONCNO
-                    for p in self.igra.veljavne_poteze():
+                    for p in self.uredi_poteze(self.igra.veljavne_poteze()):
                         self.igra.povleci_potezo(p)
                         vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
                         self.igra.razveljavi1()
@@ -207,7 +231,7 @@ class AlphaBeta:
                     # Minimiziramo
                     najboljsa_poteza = None
                     vrednost_najboljse = AlphaBeta.NESKONCNO
-                    for p in self.igra.veljavne_poteze():
+                    for p in self.uredi_poteze(self.igra.veljavne_poteze()):
                         self.igra.povleci_potezo(p)
                         vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
                         self.igra.razveljavi1()

@@ -58,7 +58,10 @@ class Gui():
                                2: Racunalnik(self, Minimax(4)),
                                3: Racunalnik(self, Minimax(5)),
                                4: Racunalnik(self, rand_alg()),
-                               5: Racunalnik(self, AlphaBeta(6))}
+                               5: Racunalnik(self, AlphaBeta(2)),
+                               6: Racunalnik(self, AlphaBeta(4)),
+                               7: Racunalnik(self, AlphaBeta(6)),
+                               8: Racunalnik(self, AlphaBeta(8))}
         
         # Če uporabnik zapre okno, naj se pokliče self.zapri_okno
         master.protocol('WM_DELETE_WINDOW', lambda: self.zapri_okno(master))
@@ -99,18 +102,22 @@ class Gui():
         menu_rdeci.add_radiobutton(label='Človek',
                                    variable=self.tip_rdeci, value=0,
                                    command=lambda: self.nastavi_rdecega(0))
+        menu_igra.add_separator()
         menu_rdeci.add_radiobutton(label='Računalnik - naključen',
                                    variable=self.tip_rdeci, value=4,
                                    command=lambda: self.nastavi_rdecega(4))
         menu_rdeci.add_radiobutton(label='Računalnik - lahek',
                                    variable=self.tip_rdeci, value=1,
-                                   command=lambda: self.nastavi_rdecega(1))
+                                   command=lambda: self.nastavi_rdecega(5))
         menu_rdeci.add_radiobutton(label='Računalnik - srednji',
                                    variable=self.tip_rdeci, value=2,
-                                   command=lambda: self.nastavi_rdecega(2))
+                                   command=lambda: self.nastavi_rdecega(6))
         menu_rdeci.add_radiobutton(label='Računalnik - težek',
                                    variable=self.tip_rdeci, value=3,
-                                   command=lambda: self.nastavi_rdecega(3))
+                                   command=lambda: self.nastavi_rdecega(7))
+        menu_rdeci.add_radiobutton(label='Računalnik - nepremagljiv',
+                                   variable=self.tip_rdeci, value=8,
+                                   command=lambda: self.nastavi_rdecega(8))
 
         # Podmenu "Rumeni"
         menu_rumeni = tkinter.Menu(menu, tearoff=0)
@@ -118,21 +125,22 @@ class Gui():
         menu_rumeni.add_radiobutton(label='Človek',
                                    variable=self.tip_rumeni, value=0,
                                    command=lambda: self.nastavi_rumenega(0))
+        menu_igra.add_separator()
         menu_rumeni.add_radiobutton(label='Računalnik - naključen',
                                    variable=self.tip_rumeni, value=4,
                                    command=lambda: self.nastavi_rumenega(4))
         menu_rumeni.add_radiobutton(label='Računalnik - lahek',
                                    variable=self.tip_rumeni, value=1,
-                                   command=lambda: self.nastavi_rumenega(1))
+                                   command=lambda: self.nastavi_rumenega(5))
         menu_rumeni.add_radiobutton(label='Računalnik - srednji',
                                    variable=self.tip_rumeni, value=2,
-                                   command=lambda: self.nastavi_rumenega(2))
+                                   command=lambda: self.nastavi_rumenega(6))
         menu_rumeni.add_radiobutton(label='Računalnik - težek',
                                    variable=self.tip_rumeni, value=3,
-                                   command=lambda: self.nastavi_rumenega(3))
-        menu_rumeni.add_radiobutton(label='Testno - alpha-beta',
-                                   variable=self.tip_rumeni, value=5,
-                                   command=lambda: self.nastavi_rumenega(5))
+                                   command=lambda: self.nastavi_rumenega(7))
+        menu_rumeni.add_radiobutton(label='Računalnik - nepremagljiv',
+                                   variable=self.tip_rumeni, value=8,
+                                   command=lambda: self.nastavi_rumenega(8))
 
         ###############################################################
         ###############################################################
