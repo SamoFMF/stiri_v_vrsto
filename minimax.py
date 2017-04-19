@@ -182,7 +182,7 @@ class Minimax:
                     for p in self.igra.veljavne_poteze():
                         self.igra.povleci_potezo(p)
                         vrednost = self.minimax(globina-1, not maksimiziramo)[1]
-                        self.igra.razveljavi()
+                        self.igra.razveljavi1()
                         if vrednost > vrednost_najboljse:
                             sez_naj_potez = [p]
                             vrednost_najboljse = vrednost
@@ -197,7 +197,7 @@ class Minimax:
                     for p in self.igra.veljavne_poteze():
                         self.igra.povleci_potezo(p)
                         vrednost = self.minimax(globina-1, not maksimiziramo)[1]
-                        self.igra.razveljavi()
+                        self.igra.razveljavi1()
                         if vrednost < vrednost_najboljse:
                             sez_naj_potez = [p]
                             vrednost_najboljse = vrednost

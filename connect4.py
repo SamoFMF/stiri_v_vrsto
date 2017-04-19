@@ -63,26 +63,30 @@ class Gui():
         master.config(menu=menu)
 
         # Podmenu "Igra"
-        menu_igra = tkinter.Menu(menu)
+        menu_igra = tkinter.Menu(menu, tearoff=0)
         menu.add_cascade(label='Igra', menu=menu_igra)
         menu_igra.add_command(label='Nova igra',
                               command=lambda: self.zacni_igro(nova=True))
         menu_igra.add_command(label='Naslednja igra', command=self.naslednja_igra)
+        menu_igra.add_separator()
         menu_igra.add_command(label='Stiri v vrsto',
                               command=lambda: self.nastavi_tip('4inarow'))
         menu_igra.add_command(label='Pet v vrsto',
                               command=lambda: self.nastavi_tip('5inarow'))
         menu_igra.add_command(label='Pop out',
                               command=lambda: self.nastavi_tip('popout'))
+        menu_igra.add_separator()
+        menu_igra.add_command(label='Izhod',
+                              command=lambda: self.zapri_okno(master))
 
         # Podmenu "Uredi"
-        menu_uredi = tkinter.Menu(menu)
+        menu_uredi = tkinter.Menu(menu, tearoff=0)
         menu.add_cascade(label='Uredi', menu=menu_uredi)
         menu_uredi.add_command(label='Razveljavi', command=self.platno_razveljavi)
         menu_uredi.add_command(label='Uveljavi', command=self.platno_uveljavi)
 
         # Podmenu "Rdeči"
-        menu_rdeci = tkinter.Menu(menu)
+        menu_rdeci = tkinter.Menu(menu, tearoff=0)
         menu.add_cascade(label='Rdeči', menu=menu_rdeci)
         menu_rdeci.add_command(label='Človek',
                                   command=lambda: self.nastavi_rdecega('clovek'))
@@ -96,7 +100,7 @@ class Gui():
                                   command=lambda: self.nastavi_rdecega('hard'))
 
         # Podmenu "Rumeni"
-        menu_rumeni = tkinter.Menu(menu)
+        menu_rumeni = tkinter.Menu(menu, tearoff=0)
         menu.add_cascade(label='Rumeni', menu=menu_rumeni)
         menu_rumeni.add_command(label='Človek',
                                   command=lambda: self.nastavi_rumenega('clovek'))

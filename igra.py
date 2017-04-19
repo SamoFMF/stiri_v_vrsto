@@ -134,6 +134,13 @@ class Igra():
         else:
             return None
 
+    def razveljavi1(self):
+        if len(self.zgodovina) > 0:
+            (self.polozaj, self.na_potezi) = self.zgodovina.pop()
+            return (self.polozaj, self.na_potezi)
+        else:
+            return None
+
     def shrani_polozaj(self):
         '''Shrani trenutni položaj igre, da se lahko vanj vrnemo
             s klicem metode 'razveljavi'.'''
