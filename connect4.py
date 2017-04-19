@@ -8,6 +8,7 @@ from rand_algoritem import *
 from minimax import *
 from pop_logika import *
 from five_logika import *
+from alphabeta import *
 
 #########################
 ## UPORABNIŠKI VMESNIK ##
@@ -44,16 +45,20 @@ class Gui():
         self.igralec_r = None # Objekt, ki igra rdeče krogce
         self.igralec_y = None # Objekt, ki igra rumene krogce
         self.igra = None # Objekt, ki predstavlja igro
-        self.tip = '4inarow' # Katero igro igramo
+        self.tip = tkinter.IntVar() # Katero igro igramo - 0='4inarow',1='5inarow',2='popout'
         self.VELIKOST_POLJA = ZVP # Velikost polja
         self.VELIKOST_GAP = self.VELIKOST_POLJA / 20 # Razdalja med okvirjem in figuro
         self.rezultat = [0, 0] # Trenutni rezultat
 
-        self.kaksen_igralec = {'clovek': Clovek(self),
-                               'easy': Racunalnik(self, Minimax(2)),
-                               'med': Racunalnik(self, Minimax(4)),
-                               'hard': Racunalnik(self, Minimax(5)),
-                               'rand': Racunalnik(self, rand_alg())}
+        self.tip_rdeci = tkinter.IntVar() # Kakšen je rdeči, 0='človek',1='rac-rand',2='rac-easy',3='rac-med',4='rac-hard'
+        self.tip_rumeni = tkinter.IntVar() # Kot pri rdečem
+
+        self.kaksen_igralec = {0: Clovek(self),
+                               1: Racunalnik(self, Minimax(2)),
+                               2: Racunalnik(self, Minimax(4)),
+                               3: Racunalnik(self, Minimax(5)),
+                               4: Racunalnik(self, rand_alg()),
+                               5: Racunalnik(self, AlphaBeta(6))}
         
         # Če uporabnik zapre okno, naj se pokliče self.zapri_okno
         master.protocol('WM_DELETE_WINDOW', lambda: self.zapri_okno(master))
@@ -69,12 +74,15 @@ class Gui():
                               command=lambda: self.zacni_igro(nova=True))
         menu_igra.add_command(label='Naslednja igra', command=self.naslednja_igra)
         menu_igra.add_separator()
-        menu_igra.add_command(label='Stiri v vrsto',
-                              command=lambda: self.nastavi_tip('4inarow'))
-        menu_igra.add_command(label='Pet v vrsto',
-                              command=lambda: self.nastavi_tip('5inarow'))
-        menu_igra.add_command(label='Pop out',
-                              command=lambda: self.nastavi_tip('popout'))
+        menu_igra.add_radiobutton(label='Štiri v vrsto',
+                                  variable=self.tip, value=0,
+                                  command=lambda: self.naslednja_igra())
+        menu_igra.add_radiobutton(label='Pet v vrsto',
+                                  variable=self.tip, value=1,
+                                  command=lambda: self.naslednja_igra())
+        menu_igra.add_radiobutton(label='Pop Out',
+                                  variable=self.tip, value=2,
+                                  command=lambda: self.naslednja_igra())
         menu_igra.add_separator()
         menu_igra.add_command(label='Izhod',
                               command=lambda: self.zapri_okno(master))
@@ -88,30 +96,43 @@ class Gui():
         # Podmenu "Rdeči"
         menu_rdeci = tkinter.Menu(menu, tearoff=0)
         menu.add_cascade(label='Rdeči', menu=menu_rdeci)
-        menu_rdeci.add_command(label='Človek',
-                                  command=lambda: self.nastavi_rdecega('clovek'))
-        menu_rdeci.add_command(label='Računalnik - naključen',
-                                  command=lambda: self.nastavi_rdecega('rand'))
-        menu_rdeci.add_command(label='Računalnik - lahek',
-                                  command=lambda: self.nastavi_rdecega('easy'))
-        menu_rdeci.add_command(label='Računalnik - srednji',
-                                  command=lambda: self.nastavi_rdecega('med'))
-        menu_rdeci.add_command(label='Računalnik - zahteven',
-                                  command=lambda: self.nastavi_rdecega('hard'))
+        menu_rdeci.add_radiobutton(label='Človek',
+                                   variable=self.tip_rdeci, value=0,
+                                   command=lambda: self.nastavi_rdecega(0))
+        menu_rdeci.add_radiobutton(label='Računalnik - naključen',
+                                   variable=self.tip_rdeci, value=4,
+                                   command=lambda: self.nastavi_rdecega(4))
+        menu_rdeci.add_radiobutton(label='Računalnik - lahek',
+                                   variable=self.tip_rdeci, value=1,
+                                   command=lambda: self.nastavi_rdecega(1))
+        menu_rdeci.add_radiobutton(label='Računalnik - srednji',
+                                   variable=self.tip_rdeci, value=2,
+                                   command=lambda: self.nastavi_rdecega(2))
+        menu_rdeci.add_radiobutton(label='Računalnik - težek',
+                                   variable=self.tip_rdeci, value=3,
+                                   command=lambda: self.nastavi_rdecega(3))
 
         # Podmenu "Rumeni"
         menu_rumeni = tkinter.Menu(menu, tearoff=0)
         menu.add_cascade(label='Rumeni', menu=menu_rumeni)
-        menu_rumeni.add_command(label='Človek',
-                                  command=lambda: self.nastavi_rumenega('clovek'))
-        menu_rumeni.add_command(label='Računalnik -  naključen',
-                                  command=lambda: self.nastavi_rumenega('rand'))
-        menu_rumeni.add_command(label='Računalnik -  lahek',
-                                  command=lambda: self.nastavi_rumenega('easy'))
-        menu_rumeni.add_command(label='Računalnik -  srednji',
-                                  command=lambda: self.nastavi_rumenega('med'))
-        menu_rumeni.add_command(label='Računalnik -  tezek',
-                                  command=lambda: self.nastavi_rumenega('hard'))
+        menu_rumeni.add_radiobutton(label='Človek',
+                                   variable=self.tip_rumeni, value=0,
+                                   command=lambda: self.nastavi_rumenega(0))
+        menu_rumeni.add_radiobutton(label='Računalnik - naključen',
+                                   variable=self.tip_rumeni, value=4,
+                                   command=lambda: self.nastavi_rumenega(4))
+        menu_rumeni.add_radiobutton(label='Računalnik - lahek',
+                                   variable=self.tip_rumeni, value=1,
+                                   command=lambda: self.nastavi_rumenega(1))
+        menu_rumeni.add_radiobutton(label='Računalnik - srednji',
+                                   variable=self.tip_rumeni, value=2,
+                                   command=lambda: self.nastavi_rumenega(2))
+        menu_rumeni.add_radiobutton(label='Računalnik - težek',
+                                   variable=self.tip_rumeni, value=3,
+                                   command=lambda: self.nastavi_rumenega(3))
+        menu_rumeni.add_radiobutton(label='Testno - alpha-beta',
+                                   variable=self.tip_rumeni, value=5,
+                                   command=lambda: self.nastavi_rumenega(5))
 
         ###############################################################
         ###############################################################
@@ -363,10 +384,6 @@ class Gui():
         self.igralec_y = self.kaksen_igralec[ime]
         self.zacni_igro(nova=True)
 
-    def nastavi_tip(self, ime):
-        self.tip = ime
-        self.naslednja_igra()
-
     def nova_igra(self):
         self.rezultat = [0, 0]
         self.zacni_igro()
@@ -595,11 +612,12 @@ class Gui():
         self.platno.delete(Gui.TAG_FIGURA)
 
         # Ustvarimo novo igro
-        if self.tip == '4inarow':
+        tip = self.tip.get()
+        if tip == 0: # Štiri v vrsto
             self.igra = Igra()
-        elif self.tip == '5inarow':
+        elif tip == 1: # Pet v vrsto
             self.igra = five_logika()
-        else:
+        else: # Pop Out
             self.igra = pop_logika()
 
         if isinstance(self.igra, five_logika):

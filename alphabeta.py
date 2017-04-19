@@ -8,8 +8,8 @@ import random
 ## ALGORITEM MINIMAX ##
 #######################
 
-class Minimax:
-    # Algoritem minimax
+class AlphaBeta:
+    # Algoritem alphabeta
 
     def __init__(self, globina):
         self.globina = globina # Kako globoko iščemo?
@@ -31,8 +31,8 @@ class Minimax:
         self.prekinitev = False # Glavno vlakno bo to nastavilo na True, če bomo morali prekiniti
         self.poteza = None # Sem napišemo potezo, ko jo najdemo
 
-        # Poženemo minimax
-        (poteza, vrednost) = self.minimax(self.globina, True)
+        # Poženemo alphabeta
+        (poteza, vrednost) = self.alphabeta(self.globina, -AlphaBeta.NESKONCNO, AlphaBeta.NESKONCNO, True)
         print('poteza = {0}, vrednost = {1}'.format(poteza, vrednost))
         self.jaz = None
         self.igra = None
@@ -44,14 +44,21 @@ class Minimax:
     ZMAGA = 10**5
     NESKONCNO = ZMAGA + 1 # Več kot zmaga
 
-    def vrednost_pozicije(self):
+    def vrednost_pozicije(self, igralec):
         '''Ocena vrednosti polozaja.'''
         vrednost = 0
         if self.igra is None:
             # Če bi se slučajno zgodilo, da ne bi bila izbrana nobena igra
             return vrednost
         elif self.igra.na_potezi is None:
-            return vrednost
+            # Igre je konec
+            (zmagovalec, stirka) = self.igra.stanje_igre()
+            if zmagovalec == igralec:
+                return AlphaBeta.ZMAGA
+            elif zmagovalec == NEODLOCENO:
+                return 0
+            else:
+                return -AlphaBeta.ZMAGA
         else:
             a = 0.8 # Faktor za katerega mu je izguba manj vredna kot dobiček
             # Najprej preverimo ker tip igre imamo
@@ -153,14 +160,14 @@ class Minimax:
                     
             (dos1, dos2) = tocke
             if self.igra.na_potezi == IGRALEC_R:
-                vrednost += (dos1 - dos2) / 69 * 0.1 * Minimax.ZMAGA
+                vrednost += (dos1 - dos2) / 69 * 0.1 * AlphaBeta.ZMAGA
             else:
-                vrednost += (dos2 - dos1) / 69 * 0.1 * Minimax.ZMAGA
+                vrednost += (dos2 - dos1) / 69 * 0.1 * AlphaBeta.ZMAGA
             vrednost *= 1 - self.igra.stevilo_zetonov() / (2*6*7)
         return vrednost
 
-    def minimax(self, globina, maksimiziramo):
-        '''Glavna metoda Minimax.'''
+    def alphabeta(self, globina, alpha, beta, maksimiziramo):
+        '''Glavna metoda AlphaBeta.'''
         if self.prekinitev:
             # Sporočili so nam, da moramo prekiniti
             return (None, 0)
@@ -170,48 +177,47 @@ class Minimax:
             k = 1 - self.igra.stevilo_zetonov() / (2*6*7)
             # Igre je konec, vrnemo njeno vrednost
             if zmagovalec == self.jaz:
-                return (None, Minimax.ZMAGA * k)
+                return (None, AlphaBeta.ZMAGA * k)
             elif zmagovalec == nasprotnik(self.jaz):
-                return (None, -Minimax.ZMAGA * k)
+                return (None, -AlphaBeta.ZMAGA * k)
             else:
                 return (None, 0)
         elif zmagovalec == NI_KONEC:
             # Igre ni konec
+            igralec = self.igra.na_potezi
             if globina == 0:
-                return (None, self.vrednost_pozicije())
+                return (None, self.vrednost_pozicije(igralec))
             else:
-                # Naredimo en korak minimax metode
+                # Naredimo en korak alphabeta metode
                 if maksimiziramo:
                     # Maksimiziramo
                     najboljsa_poteza = None
-                    sez_naj_potez = []
-                    vrednost_najboljse = -Minimax.NESKONCNO
+                    vrednost_najboljse = -AlphaBeta.NESKONCNO
                     for p in self.igra.veljavne_poteze():
                         self.igra.povleci_potezo(p)
-                        vrednost = self.minimax(globina-1, not maksimiziramo)[1]
+                        vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
                         self.igra.razveljavi1()
                         if vrednost > vrednost_najboljse:
-                            sez_naj_potez = [p]
+                            najboljsa_poteza = p
                             vrednost_najboljse = vrednost
-                        elif vrednost == vrednost_najboljse:
-                            sez_naj_potez.append(p)
-                    najboljsa_poteza = random.choice(sez_naj_potez)
+                            alpha = max(alpha, vrednost_najboljse)
+                        if beta <= alpha:
+                            break
                 else:
                     # Minimiziramo
                     najboljsa_poteza = None
-                    sez_naj_potez = []
-                    vrednost_najboljse = Minimax.NESKONCNO
+                    vrednost_najboljse = AlphaBeta.NESKONCNO
                     for p in self.igra.veljavne_poteze():
                         self.igra.povleci_potezo(p)
-                        vrednost = self.minimax(globina-1, not maksimiziramo)[1]
+                        vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
                         self.igra.razveljavi1()
                         if vrednost < vrednost_najboljse:
-                            sez_naj_potez = [p]
+                            najboljsa_poteza = p
                             vrednost_najboljse = vrednost
-                        elif vrednost == vrednost_najboljse:
-                            sez_naj_potez.append(p)
-                    najboljsa_poteza = random.choice(sez_naj_potez)
-                assert (najboljsa_poteza is not None), 'minimax: izračunana poteza je None'
+                            beta = min(beta, vrednost_najboljse)
+                        if beta <= alpha:
+                            break
+                assert (najboljsa_poteza is not None), 'alphabeta: izračunana poteza je None'
                 return (najboljsa_poteza, vrednost_najboljse)
         else:
-            assert False, 'minimax: nedefinirano stanje igre'
+            assert False, 'alphabeta: nedefinirano stanje igre'
