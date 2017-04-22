@@ -36,7 +36,16 @@ class five_logika(Igra):
                 if j < 2: # Diagonale desno gor
                     petke.append([(i,j), (i+1,j+1), (i+2,j+2), (i+3,j+3), (i+4,j+4)])
                 if j > 3: # Diagonalne desno dol
-                    petke.append([(i,j), (i+1,j-1), (i+2,j-2), (i+3,j-3), (i+4,j-4)])
+                    petke.append([(i,j), (i+1,j-1), (i+2,j-2), (i+3,j-3), (i+4,j-4)])    
+
+    def kopija(self):
+        '''Vrni kopijo te igre, brez zgodovine.'''
+        # Potrebujemo, da se ne rišejo poteze, ko računalnik razmišlja
+        k = five_logika()
+        k.polozaj = [self.polozaj[i][:] for i in range(7)]
+        k.na_potezi = self.na_potezi
+        k.stevilo_potez = self.stevilo_potez
+        return k
     
     def stanje_igre(self):
         '''Vrne nam trenutno stanje igre. Možnosti so:
@@ -73,12 +82,4 @@ class five_logika(Igra):
             # Če pridemo do sem, so vsa polja zasedena in ni več veljavnih potez
             # Pravtako tudi zmagovalca ni, torej je rezultat neodločen
             return (NEODLOCENO, None)
-
-    def kopija(self):
-        '''Vrni kopijo te igre, brez zgodovine.'''
-        # Potrebujemo, da se ne rišejo poteze, ko računalnik razmišlja
-        k = five_logika()
-        k.polozaj = [self.polozaj[i][:] for i in range(7)]
-        k.na_potezi = self.na_potezi
-        return k
         

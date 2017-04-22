@@ -11,6 +11,7 @@ class pop_logika(Igra):
         k = pop_logika()
         k.polozaj = [self.polozaj[i][:] for i in range(7)]
         k.na_potezi = self.na_potezi
+        k.stevilo_potez = self.stevilo_potez
         return k
 
     def stanje_igre(self):

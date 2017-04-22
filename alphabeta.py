@@ -188,8 +188,9 @@ class AlphaBeta:
                 vrednost += (dos1 - dos2) / 69 * 0.1 * AlphaBeta.ZMAGA
             else:
                 vrednost += (dos2 - dos1) / 69 * 0.1 * AlphaBeta.ZMAGA
-            vrednost *= 1 - self.igra.stevilo_zetonov() / (2*6*7)
-        return vrednost
+            # Tukaj opazimo, da pri Pop Out lahko pride, da množimo z negativno vrednostjo
+            vrednost *= 1 - self.igra.stevilo_potez / (2*6*7)
+        return int(vrednost)
 
     def alphabeta(self, globina, alpha, beta, maksimiziramo):
         '''Glavna metoda AlphaBeta.'''
@@ -199,7 +200,9 @@ class AlphaBeta:
 
         (zmagovalec, stirka) = self.igra.stanje_igre()
         if zmagovalec in (IGRALEC_R, IGRALEC_Y, NEODLOCENO):
-            k = 1 - self.igra.stevilo_zetonov() / (2*6*7)
+            # Tukaj opazimo, da pri Pop Out lahko pride do tega, da je k < 0
+            # Premisli, kaj storiti
+            k = 1 - self.igra.stevilo_potez / (2*6*7)
             # Igre je konec, vrnemo njeno vrednost
             if zmagovalec == self.jaz:
                 return (None, AlphaBeta.ZMAGA * k)
