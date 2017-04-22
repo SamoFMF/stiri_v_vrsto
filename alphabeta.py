@@ -33,6 +33,7 @@ class AlphaBeta:
 
         # Poženemo alphabeta
         (poteza, vrednost) = self.alphabeta(self.globina, -AlphaBeta.NESKONCNO, AlphaBeta.NESKONCNO, True)
+        assert (poteza is not None), 'alphabeta: izračunana poteza je None'
         print('igralec = {2}, poteza = {0}, vrednost = {1}'.format(poteza, vrednost, self.jaz))
         self.jaz = None
         self.igra = None
@@ -216,32 +217,27 @@ class AlphaBeta:
                 if maksimiziramo:
                     # Maksimiziramo
                     najboljsa_poteza = None
-                    vrednost_najboljse = -AlphaBeta.NESKONCNO
                     for p in self.uredi_poteze(self.igra.veljavne_poteze()):
                         self.igra.povleci_potezo(p)
                         vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
                         self.igra.razveljavi1()
-                        if vrednost > vrednost_najboljse:
+                        if vrednost > alpha:
                             najboljsa_poteza = p
-                            vrednost_najboljse = vrednost
-                            alpha = max(alpha, vrednost_najboljse)
+                            alpha = vrednost
                         if beta <= alpha:
                             break
                 else:
                     # Minimiziramo
                     najboljsa_poteza = None
-                    vrednost_najboljse = AlphaBeta.NESKONCNO
                     for p in self.uredi_poteze(self.igra.veljavne_poteze()):
                         self.igra.povleci_potezo(p)
                         vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
                         self.igra.razveljavi1()
-                        if vrednost < vrednost_najboljse:
+                        if vrednost < beta:
                             najboljsa_poteza = p
-                            vrednost_najboljse = vrednost
-                            beta = min(beta, vrednost_najboljse)
+                            beta = vrednost
                         if beta <= alpha:
                             break
-                assert (najboljsa_poteza is not None), 'alphabeta: izračunana poteza je None'
-                return (najboljsa_poteza, vrednost_najboljse)
+                return (najboljsa_poteza, alpha if maksimiziramo else beta)
         else:
             assert False, 'alphabeta: nedefinirano stanje igre'
