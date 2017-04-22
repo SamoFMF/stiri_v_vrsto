@@ -53,6 +53,7 @@ class Gui():
         self.tip_rdeci = tkinter.IntVar() # Kakšen je rdeči, 0='človek',1='rac-rand',2='rac-easy',3='rac-med',4='rac-hard'
         self.tip_rumeni = tkinter.IntVar() # Kot pri rdečem
 
+        # Slovar 'tipov' igralcev
         self.kaksen_igralec = {0: Clovek(self),
                                1: Racunalnik(self, Minimax(2)),
                                2: Racunalnik(self, Minimax(4)),
@@ -62,6 +63,15 @@ class Gui():
                                6: Racunalnik(self, AlphaBeta(4)),
                                7: Racunalnik(self, AlphaBeta(6)),
                                8: Racunalnik(self, AlphaBeta(8))}
+
+        # Nastavimo imeni igralcev, ki jih lahko uporabnik nato spreminja
+        self.ime_r = tkinter.StringVar() # Ime igralca z rdečimi žetoni
+        self.ime_r.set('Rdeči') # Po defaultu je rdečemu ime 'Rdeči'
+        self.ime_y = tkinter.StringVar() # Ime igralca z rumenimi žetoni
+        self.ime_y.set('Rumeni') # Po defaultu je rumenemu ime 'Rumeni'
+        # Beležiti želimo tudi spremembe imena in ga primerno urediti
+        self.ime_r.trace('w', lambda name, index, mode: self.uredi_ime(self.ime_r))
+        self.ime_y.trace('w', lambda name, index, mode: self.uredi_ime(self.ime_y))
         
         # Če uporabnik zapre okno, naj se pokliče self.zapri_okno
         master.protocol('WM_DELETE_WINDOW', lambda: self.zapri_okno(master))
@@ -208,25 +218,24 @@ class Gui():
 
         # Narišemo figure za platno_menu
         # Najprej nespremenljiv del
-        dy = Gui.VISINA_PLATNO_MENU / 30
-        dx = 0.18 * Gui.VISINA_PLATNO_MENU
+        dx = 0.15 * Gui.VISINA_PLATNO_MENU
 
-        self.e1 = tkinter.Entry(master, fg='Red', bg='Black',
+        self.platno_ime_r = tkinter.Entry(master, fg='red', bg='black',
                                 font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/12)),
                                            'bold'),
-                                width='8', borderwidth='0', justify='center')
+                                width='10', borderwidth='0', justify='center',
+                                textvariable=self.ime_r)
                                     
-        self.e2 = tkinter.Entry(master, bg='Black', fg='yellow',
+        self.platno_ime_y = tkinter.Entry(master, fg='yellow', bg='black',
                                 font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/12)),
                                            'bold'),
-                                width='8', borderwidth='0', justify='center')
-
-        self.e1.insert(0, 'Rdeči')
-        self.e2.insert(0, 'Rumeni')
+                                width='10', borderwidth='0', justify='center',
+                                textvariable=self.ime_y)
         
-        self.platno_menu.create_window(5, 10+dy, anchor=tkinter.NW, window=self.e1)
+        self.platno_menu.create_window(50+dx, 10, anchor=tkinter.N, window=self.platno_ime_r)
         
-        self.platno_menu.create_window(Gui.SIRINA_PLATNO_MENU-5, 10+dy, anchor=tkinter.NE, window=self.e2)
+        self.platno_menu.create_window(Gui.SIRINA_PLATNO_MENU-50-dx, 10,
+                                       anchor=tkinter.N, window=self.platno_ime_y)
         
         # Pričnemo igro
         self.zacni_igro(nova=True)
@@ -272,15 +281,15 @@ class Gui():
         self.platno_menu.delete(Gui.TAG_SPREMENLJIVI)
         dy = 5 * Gui.VISINA_PLATNO_MENU / 30
         dx = 0.15 * Gui.VISINA_PLATNO_MENU
-        self.platno_menu.create_text(10+dx, 10+dy,
+        self.platno_menu.create_text(50+dx, 10+dy,
                                      text='{0}'.format(self.rezultat[0]),
-                                     fill='white', anchor=tkinter.NW,
+                                     fill='white', anchor=tkinter.N,
                                      font=('Helvetica','{0}'.format(int(Gui.VISINA_PLATNO_MENU/10)),
                                            'bold'),
                                      tag=Gui.TAG_SPREMENLJIVI)
-        self.platno_menu.create_text(Gui.SIRINA_PLATNO_MENU-10-dx, 10+dy,
+        self.platno_menu.create_text(Gui.SIRINA_PLATNO_MENU-50-dx, 10+dy,
                                      text='{0}'.format(self.rezultat[1]),
-                                     fill='white', anchor=tkinter.NE,
+                                     fill='white', anchor=tkinter.N,
                                      font=('Helvetica','{0}'.format(int(Gui.VISINA_PLATNO_MENU/10)),
                                            'bold'),
                                      tag=Gui.TAG_SPREMENLJIVI)
@@ -598,6 +607,12 @@ class Gui():
         if self.igra.na_potezi is None:
             (zmagovalec, stirka) = self.igra.stanje_igre()
             self.koncaj_igro(zmagovalec, stirka)
+
+    def uredi_ime(self, ime):
+        text = ime.get()
+        dolzina = 7 - min(2, max(text.lower().count('w'), min(1, text.lower().count('m'))))
+        if len(text) > dolzina:
+            ime.set(text[:dolzina])
 
     def zacni_igro(self, nova=False):
         '''Zacne novo igro. Torej zaenkrat le pobriše vse dosedanje poteze.'''
