@@ -1,7 +1,7 @@
 import tkinter # Uvozimo tkinter za uporabniški vmesnik
 from math import sqrt
 
-from igra import *
+from logika import *
 from clovek import *
 from racunalnik import *
 from rand_algoritem import *
@@ -246,15 +246,8 @@ class Gui():
     def koncaj_igro(self, zmagovalec, stirka):
         '''Nastavi stanje igre na 'konec igre'.'''
         self.narisi_platno_menu(zmagovalec)
-        if zmagovalec == IGRALEC_R:
-            #self.napis.set('Zmagal je RDEČI!')
+        if stirka is not None:
             self.obkrozi(stirka)
-        elif zmagovalec == IGRALEC_Y:
-            #self.napis.set('Zmagal je RUMENI!')
-            self.obkrozi(stirka)
-        else:
-            pass
-            #self.napis.set('Igra je NEODLOČENA!')
 
     def narisi_okvir(self):
         '''Nariše črte (okvir) na igralno povrčino.'''
@@ -400,56 +393,57 @@ class Gui():
         self.rezultat = [0, 0]
         self.zacni_igro()
 
-    def obkrozi(self, stirka):
+    def obkrozi(self, stirke):
         d = self.VELIKOST_POLJA
         w = 5 # Odsvetujem spreminjanje (namenoma je fiksna vrednost)
-        (i1,j1) = stirka[0]
-        (i2,j2) = stirka[-1]
-        if (i1 == i2) or (j1 == j2):
-            x1 = d/2 + i1*d
-            y1 = 13*d/2 - j1*d
-            x2 = d/2 + (i2+1)*d
-            y2 = 13*d/2 - (j2+1)*d
-            self.platno.create_rectangle(x1, y1, x2, y2,
-                                         width=w,
-                                         tag=Gui.TAG_FIGURA)
-        else: # Diagonalni - popravi jih še v kotih
-            # Najprej izračunamo središče S = (xt1,yt1)
-            # najbolj levega kvadratka
-            xt1 = (i1+1)*d
-            yt1 = (6-j1)*d
+        for stirka in stirke: # Gremo po vseh štirkah
+            (i1,j1) = stirka[0]
+            (i2,j2) = stirka[-1]
+            if (i1 == i2) or (j1 == j2):
+                x1 = d/2 + i1*d
+                y1 = 13*d/2 - j1*d
+                x2 = d/2 + (i2+1)*d
+                y2 = 13*d/2 - (j2+1)*d
+                self.platno.create_rectangle(x1, y1, x2, y2,
+                                             width=w,
+                                             tag=Gui.TAG_FIGURA)
+            else: # Diagonalni - popravi jih še v kotih
+                # Najprej izračunamo središče S = (xt1,yt1)
+                # najbolj levega kvadratka
+                xt1 = (i1+1)*d
+                yt1 = (6-j1)*d
 
-            # Zarotiramo kvadrat za pi/4 v levo
-            r = sqrt(2)*d/2
-            x1 = xt1 - r
-            y1 = yt1
-            x2 = xt1
-            # Če je štirka desno dol samo preslikamo y2 čez S
-            y2 = yt1 + r if j1 < j2 else yt1 - r
+                # Zarotiramo kvadrat za pi/4 v levo
+                r = sqrt(2)*d/2
+                x1 = xt1 - r
+                y1 = yt1
+                x2 = xt1
+                # Če je štirka desno dol samo preslikamo y2 čez S
+                y2 = yt1 + r if j1 < j2 else yt1 - r
 
-            dxy = (sqrt(2) + 6) * d / 2 + (i2-i1-3)*d
-            x3 = x1 + dxy
-            x4 = x2 + dxy
+                dxy = (sqrt(2) + 6) * d / 2 + (i2-i1-3)*d
+                x3 = x1 + dxy
+                x4 = x2 + dxy
 
-            if j1 < j2:
-                y3 = y1 - dxy
-                y4 = y2 - dxy
-            else:
-                y3 = y1 + dxy
-                y4 = y2 + dxy
+                if j1 < j2:
+                    y3 = y1 - dxy
+                    y4 = y2 - dxy
+                else:
+                    y3 = y1 + dxy
+                    y4 = y2 + dxy
 
-            self.platno.create_line(x1, y1, x3, y3,
-                                    width=w,
-                                    tag=Gui.TAG_FIGURA)
-            self.platno.create_line(x2, y2, x4, y4,
-                                    width=w,
-                                    tag=Gui.TAG_FIGURA)
-            self.platno.create_line(x1, y1, x2, y2,
-                                    width=w,
-                                    tag=Gui.TAG_FIGURA)
-            self.platno.create_line(x3, y3, x4, y4,
-                                    width=w,
-                                    tag=Gui.TAG_FIGURA)
+                self.platno.create_line(x1, y1, x3, y3,
+                                        width=w,
+                                        tag=Gui.TAG_FIGURA)
+                self.platno.create_line(x2, y2, x4, y4,
+                                        width=w,
+                                        tag=Gui.TAG_FIGURA)
+                self.platno.create_line(x1, y1, x2, y2,
+                                        width=w,
+                                        tag=Gui.TAG_FIGURA)
+                self.platno.create_line(x3, y3, x4, y4,
+                                        width=w,
+                                        tag=Gui.TAG_FIGURA)
 
     def platno_klik(self, event):
         (x,y) = (event.x, event.y)
@@ -528,13 +522,11 @@ class Gui():
             # Narišemo novi (trenutni) položaj
             self.narisi_polozaj(novo_stanje[0])
 
-            # Popravimo napis nad igralno površino
+            # Uredimo grafični prikaz
             if self.igra.na_potezi == IGRALEC_R:
-                #self.napis.set('Na potezi je RDEČI!')
                 self.narisi_platno_menu()
                 self.igralec_r.igraj()
             elif self.igra.na_potezi == IGRALEC_Y:
-                #self.napis.set('Na potezi je RUMENI!')
                 self.narisi_platno_menu()
                 self.igralec_y.igraj()
             else:

@@ -2,7 +2,7 @@
 ## LOGIKA PET-V-VRSTO ##
 ########################
 
-from igra import *
+from logika import *
 
 class five_logika(Igra):
     # Tabela vseh možnih zmagovalnih kombinacij 4 v vrsto
@@ -59,20 +59,20 @@ class five_logika(Igra):
             barva = self.polozaj[i1][j1]
             if (barva == IGRALEC_R) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
                 # s je naša zmagovalna štirka
-                return (barva, s)
+                return (barva, [s])
         for s in five_logika.stirke_Y:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
             barva = self.polozaj[i1][j1]
             if (barva == IGRALEC_Y) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
                 # s je naša zmagovalna štirka
-                return (barva, s)
+                return (barva, [s])
         # Preverimo še sedaj, če obstaja zmagovalna petka
         for p in five_logika.petke:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4), (i5,j5)) = p
             barva = self.polozaj[i1][j1]
             if (barva != PRAZNO) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4] == self.polozaj[i5][j5]):
                 # s je naša zmagovalna petka
-                return (barva, p)
+                return (barva, [p])
         # Če zmagovalca ni, moramo preveriti, če je igre konec
         poteze = self.veljavne_poteze()
         if len(poteze) > 0:

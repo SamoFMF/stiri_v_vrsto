@@ -2,7 +2,7 @@
 ## LOGIKA POPOUT ##
 ###################
 
-from igra import *
+from logika import *
 
 class pop_logika(Igra):
 
@@ -28,13 +28,17 @@ class pop_logika(Igra):
             barva = self.polozaj[i1][j1]
             if (barva != PRAZNO) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
                 # s je naša zmagovalna štirka
-                zmagovalci.append(barva)
-                stirke.append(s)
-        if len(set(zmagovalci)) == 1:
+                if barva in zmagovalci:
+                    # Ta igralec že ima vsaj 1 zmagovalno štirko
+                    continue
+                else:
+                    zmagovalci.append(barva)
+                    stirke.append(s)
+        if len(zmagovalci) == 1:
             return (zmagovalci[0], stirke[0])
-        elif len(set(zmagovalci)) == 2:
+        elif len(zmagovalci) == 2:
             # Imamo 2 zmagovalca, torej je igra neodločena
-            return (NEODLOCENO, None)
+            return (NEODLOCENO, stirke)
         # Če zmagovalca ni, moramo preveriti, če je igre konec
         poteze = self.veljavne_poteze()
         if len(poteze) > 0:

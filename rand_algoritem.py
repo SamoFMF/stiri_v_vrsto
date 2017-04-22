@@ -1,4 +1,4 @@
-from igra import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, NEVELJAVNO, nasprotnik
+from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, NEVELJAVNO, nasprotnik
 import random
 
 ######################

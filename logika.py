@@ -2,9 +2,6 @@
 ## LOGIKA IGRE ##
 #################
 
-##from norm_logika import *
-##from pop_logika import *
-##from five_logika import *
 import random
 
 IGRALEC_R = 1 # Igralec, ki ima rdeče krogce
@@ -170,7 +167,7 @@ class Igra():
             barva = self.polozaj[i1][j1]
             if (barva != PRAZNO) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
                 # s je naša zmagovalna štirka
-                return (barva, s)
+                return (barva, [s])
         # Če zmagovalca ni, moramo preveriti, če je igre konec
         poteze = self.veljavne_poteze()
         if len(poteze) > 0:

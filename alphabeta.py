@@ -1,6 +1,6 @@
 import logging
 
-from igra import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik, NEVELJAVNO
+from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik, NEVELJAVNO
 from five_logika import five_logika
 import random
 
