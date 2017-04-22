@@ -35,7 +35,7 @@ class pop_logika(Igra):
                     zmagovalci.append(barva)
                     stirke.append(s)
         if len(zmagovalci) == 1:
-            return (zmagovalci[0], stirke[0])
+            return (zmagovalci[0], stirke)
         elif len(zmagovalci) == 2:
             # Imamo 2 zmagovalca, torej je igra neodločena
             return (NEODLOCENO, stirke)

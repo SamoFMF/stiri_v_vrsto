@@ -387,6 +387,12 @@ class Gui():
                 self.rezultat[0] += 1
             elif zmagovalec == IGRALEC_Y:
                 self.rezultat[1] += 1
+            else:
+                self.rezultat[0] += 0.5
+                self.rezultat[1] += 0.5
+                if self.rezultat[0] == int(self.rezultat[0]):
+                    self.rezultat[0] = int(self.rezultat[0])
+                    self.rezultat[1] = int(self.rezultat[1])
         self.zacni_igro()
 
     def nova_igra(self):
