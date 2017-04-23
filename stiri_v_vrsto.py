@@ -46,13 +46,18 @@ class Gui():
         self.igralec_r = None # Objekt, ki igra rdeče krogce
         self.igralec_y = None # Objekt, ki igra rumene krogce
         self.igra = None # Objekt, ki predstavlja igro
-        self.tip = tkinter.IntVar() # Katero igro igramo - 0='4inarow',1='5inarow',2='popout'
         self.VELIKOST_POLJA = ZVP # Velikost polja
         self.VELIKOST_GAP = self.VELIKOST_POLJA / 20 # Razdalja med okvirjem in figuro
         self.rezultat = [0, 0] # Trenutni rezultat
 
         self.tip_rdeci = tkinter.IntVar() # Kakšen je rdeči, 0='človek',1='rac-rand',2='rac-easy',3='rac-med',4='rac-hard'
         self.tip_rumeni = tkinter.IntVar() # Kot pri rdečem
+
+        self.tip = tkinter.IntVar() # Katero igro igramo - 0='4inarow',1='5inarow',2='popout',3='powerup'
+
+        self.pup = tkinter.IntVar() # Kateri power up imamo izbran
+        self.pup.set(0)
+        self.pup_pomozni = 0 # Pomožni števec, ki bo povedal, kaj je bilo izbrano predhodno in bo omogočil 'odzbrati'
 
         # Slovar 'tipov' igralcev
         self.tip_igralca = {0: lambda: Clovek(self),
@@ -77,6 +82,8 @@ class Gui():
         # Beležiti želimo tudi spremembe imena in ga primerno urediti
         self.ime_r.trace('w', lambda name, index, mode: self.uredi_ime(self.ime_r))
         self.ime_y.trace('w', lambda name, index, mode: self.uredi_ime(self.ime_y))
+        # Sledimo tudi spremembam 'self.tip', da vemo, kdaj vklopiti gumbe za power up poteze
+        self.tip.trace('w', lambda name, index, mode: self.stanje_gumbov(self.tip.get(), 1))
         
         # Če uporabnik zapre okno, naj se pokliče self.zapri_okno
         master.protocol('WM_DELETE_WINDOW', lambda: self.zapri_okno(master))
@@ -201,29 +208,54 @@ class Gui():
                                           width=Gui.SIRINA_PLATNO_MENU,
                                           height=Gui.VISINA_PLATNO_MENU)
         self.platno_menu.config(bg='black') # Za čas testiranja
-        self.platno_menu.grid(row=0, column=0, sticky=tkinter.NW)
+        self.platno_menu.grid(row=0, column=0, columnspan=4, sticky=tkinter.NW)
 
         # Dodamo možnosti
         self.gumb_nova_igra = tkinter.Button(self.frame1, text='Nova igra',
                                              width=int(0.4*MIN_SIRINA/7.25),
                                              command=lambda: self.zacni_igro(nova=True))
-        self.gumb_nova_igra.grid(row=1, column=0, pady=5)
+        self.gumb_nova_igra.grid(row=1, column=0, columnspan=4, pady=5)
         self.gumb_naslednja_igra = tkinter.Button(self.frame1, text='Naslednja igra',
                                                   width=int(0.4*MIN_SIRINA/7.25),
                                                   command=self.naslednja_igra)
-        self.gumb_naslednja_igra.grid(row=2, column=0, pady=5)
+        self.gumb_naslednja_igra.grid(row=2, column=0, columnspan=4, pady=(0,5))
         self.gumb_razveljavi = tkinter.Button(self.frame1, text='Razveljavi',
                                               width=int(0.4*MIN_SIRINA/7.25),
                                               command=self.platno_razveljavi)
-        self.gumb_razveljavi.grid(row=3, column=0, pady=(20,5))
+        self.gumb_razveljavi.grid(row=3, column=0, columnspan=4, pady=5)
         self.gumb_uveljavi = tkinter.Button(self.frame1, text='Uveljavi',
                                             width=int(0.4*MIN_SIRINA/7.25),
                                             command=self.platno_uveljavi)
-        self.gumb_uveljavi.grid(row=4, column=0, pady=5)
+        self.gumb_uveljavi.grid(row=4, column=0, columnspan=4, pady=(0,5))
+        # Ti gumbi so aktivni samo v primeru, da imamo 'Power Up' igro
+        self.gumb_pup1 = tkinter.Radiobutton(self.frame1, text='Stolpec',
+                                             variable=self.pup, value=1,
+                                             command=self.odznaci_gumb)
+        self.gumb_pup1.grid(row=5,column=0, pady=15)
+        self.gumb_pup2 = tkinter.Radiobutton(self.frame1, text='Žeton',
+                                             variable=self.pup, value=2,
+                                             command=self.odznaci_gumb)
+        self.gumb_pup2.grid(row=5,column=1, pady=15)
+        self.gumb_pup3 = tkinter.Radiobutton(self.frame1, text='2x-NW',
+                                             variable=self.pup, value=3,
+                                             command=self.odznaci_gumb)
+        self.gumb_pup3.grid(row=5,column=2,pady=15)
+        self.gumb_pup4 = tkinter.Radiobutton(self.frame1, text='2x-W',
+                                             variable=self.pup, value=4,
+                                             command=self.odznaci_gumb)
+        self.gumb_pup4.grid(row=5,column=3,pady=15)
+
+        # Vsi ti gumbi za power upe na začetku niso aktivni, saj pričnemo z navadno 4 v vrsto
+        self.gumb_pup1.config(state=tkinter.DISABLED)
+        self.gumb_pup2.config(state=tkinter.DISABLED)
+        self.gumb_pup3.config(state=tkinter.DISABLED)
+        self.gumb_pup4.config(state=tkinter.DISABLED)
+
+        # Gumb za izhod
         self.gumb_izhod = tkinter.Button(self.frame1, text='Izhod',
                                          width=int(0.3*0.8*MIN_SIRINA/7.25),
                                          command=lambda: self.zapri_okno(master))
-        self.gumb_izhod.grid(row=5, column=0, pady=(30,5))
+        self.gumb_izhod.grid(row=6, column=0, columnspan=4, pady=(15,5))
 
         # Narišemo figure za platno_menu
         # Najprej nespremenljiv del
@@ -248,6 +280,15 @@ class Gui():
         
         # Pričnemo igro
         self.zacni_igro(nova=True)
+
+    def odznaci_gumb(self):
+        '''Deselecta gumb, če je le-ta že bil izbran in ponovno kliknjen.'''
+        if self.pup.get() == self.pup_pomozni:
+            self.pup.set(0)
+            self.pup_pomozni = 0
+        else:
+            self.pup_pomozni = self.pup.get()
+        pass
 
     def koncaj_igro(self, zmagovalec, stirka):
         '''Nastavi stanje igre na 'konec igre'.'''
@@ -342,10 +383,56 @@ class Gui():
                                          font=('Helvetica','{0}'.format(int(Gui.VISINA_PLATNO_MENU/10)),
                                                'bold'),
                                          tag=Gui.TAG_SPREMENLJIVI)
-            self.platno_menu.create_oval(Gui.SIRINA_PLATNO_MENU / 2 - 0.5*dy, 10 + 3.75*dy,
-                                         Gui.SIRINA_PLATNO_MENU / 2 + dy, 10 + 5.25*dy,
+            self.platno_menu.create_oval(Gui.SIRINA_PLATNO_MENU / 2 - 0.75*dy, 10 + 3.75*dy,
+                                         Gui.SIRINA_PLATNO_MENU / 2 + 0.75*dy, 10 + 5.25*dy,
                                          fill='{0}'.format('red' if self.igra.na_potezi==IGRALEC_R else 'yellow'),
                                          tag=Gui.TAG_SPREMENLJIVI)
+            if isinstance(self.igra, Powerup_logika):
+                # Dodati moramo power upe
+                pup_r = self.igra.powerups[0] # Power ups za rdečega
+                pup_y = self.igra.powerups[1] # Power ups za rumenega
+                stranica = Gui.SIRINA_PLATNO_MENU * 0.75 / 6
+                # TOLE SO ZAČASNI PLACEHOLDERJI
+                # TODO
+                # Za rdečega igralca
+                if pup_r[0] > 0:
+                    self.platno_menu.create_rectangle(10, Gui.VISINA_PLATNO_MENU / 3,
+                                                      10 + stranica, Gui.VISINA_PLATNO_MENU / 3 + stranica,
+                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                if pup_r[1] > 0:
+                    self.platno_menu.create_rectangle(10, Gui.VISINA_PLATNO_MENU / 2,
+                                                      10 + stranica, Gui.VISINA_PLATNO_MENU / 2 + stranica,
+                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                if pup_r[2] > 0:
+                    self.platno_menu.create_rectangle(10, 2 * Gui.VISINA_PLATNO_MENU / 3,
+                                                      10 + stranica, 2 * Gui.VISINA_PLATNO_MENU / 3 + stranica,
+                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                if pup_r[3] > 0:
+                    self.platno_menu.create_rectangle(10, 5 * Gui.VISINA_PLATNO_MENU / 6,
+                                                      10 + stranica, 5 * Gui.VISINA_PLATNO_MENU / 6 + stranica,
+                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+
+                # Za rumenega igralca
+                if pup_y[0] > 0:
+                    self.platno_menu.create_rectangle(Gui.SIRINA_PLATNO_MENU - 10, Gui.VISINA_PLATNO_MENU / 3,
+                                                      Gui.SIRINA_PLATNO_MENU - 10 - stranica,
+                                                      Gui.VISINA_PLATNO_MENU / 3 + stranica,
+                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                if pup_y[1] > 0:
+                    self.platno_menu.create_rectangle(Gui.SIRINA_PLATNO_MENU - 10, Gui.VISINA_PLATNO_MENU / 2,
+                                                      Gui.SIRINA_PLATNO_MENU - 10 - stranica,
+                                                      Gui.VISINA_PLATNO_MENU / 2 + stranica,
+                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                if pup_y[2] > 0:
+                    self.platno_menu.create_rectangle(Gui.SIRINA_PLATNO_MENU - 10, 2 * Gui.VISINA_PLATNO_MENU / 3,
+                                                      Gui.SIRINA_PLATNO_MENU - 10 - stranica,
+                                                      2 * Gui.VISINA_PLATNO_MENU / 3 + stranica,
+                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                if pup_y[3] > 0:
+                    self.platno_menu.create_rectangle(Gui.SIRINA_PLATNO_MENU - 10, 5 * Gui.VISINA_PLATNO_MENU / 6,
+                                                      Gui.SIRINA_PLATNO_MENU - 10 - stranica,
+                                                      5 * Gui.VISINA_PLATNO_MENU / 6 + stranica,
+                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
 
     def narisi_polozaj(self, polozaj): # Premisli, če rabiš polozaj
         for (i, a) in enumerate(polozaj):
@@ -466,8 +553,26 @@ class Gui():
         else:
             # TODO - preveri za robne pogoje
             i = int((x - d/2) // self.VELIKOST_POLJA) + 1
-            j = 5 - int((y - d/2) // self.VELIKOST_POLJA) # BRIŠI?
-            if isinstance(self.igra, Pop_logika) and j == 0:
+            j = 5 - int((y - d/2) // self.VELIKOST_POLJA)
+            if isinstance(self.igra, Powerup_logika):
+                # Imamo Power Up igro
+                if self.pup.get() == 0:
+                    # Aktiven ni noben power up
+                    # Naredimo navadno potezo, torej je i že pravilno definiran
+                    pass
+                elif self.pup.get() == 1:
+                    # Imamo potezo, ki uniči stolpec pod seboj
+                    i += 10
+                elif self.pup.get() == 2:
+                    # Imamo potezo, ki odstrani nasprotnikov žeton
+                    i += 20 + 7*j
+                elif self.pup.get() == 3:
+                    # Imamo dvojno potezo, kjer NI dovoljeno zmagati
+                    i += 70
+                else:
+                    # Imamo dvojno potezo, kjer JE dovoljeno zmagati
+                    i += 80
+            elif isinstance(self.igra, Pop_logika) and j == 0:
                 i = -i
             if self.igra.na_potezi == IGRALEC_R:
                 self.igralec_r.klik(i)
@@ -600,10 +705,6 @@ class Gui():
         else:
             # Smo na koncu 'zgodovine' (igre)
             pass
-
-    def pojdi_nazaj(self):
-        # TODO
-        pass
     
     def povleci_potezo(self, p):
         igralec = self.igra.na_potezi
@@ -613,6 +714,11 @@ class Gui():
             # Poteza ni bila veljavna
             pass
         else:
+            if isinstance(self.igra, Powerup_logika) and self.pup.get() > 0:
+                # Če imamo Power Up igro in smo povlekli potezo,
+                # želimo sedaj odizbrati powerup, če smo ga igrali
+                self.pup.set(0)
+                self.pup_pomozni = 0
             (zmagovalec, stirka, p1, osvezi) = t # Tukaj je p1 položaj na platnu
             if osvezi:
                 self.platno.delete(Gui.TAG_FIGURA)
@@ -627,6 +733,7 @@ class Gui():
             if zmagovalec == NI_KONEC:
                 # Igre še ni konec
                 self.narisi_platno_menu()
+                self.stanje_gumbov(self.tip.get())
                 if self.igra.na_potezi == IGRALEC_R:
                     self.igralec_r.igraj()
                 elif self.igra.na_potezi == IGRALEC_Y:
@@ -655,6 +762,40 @@ class Gui():
         if self.igra.na_potezi is None:
             (zmagovalec, stirka) = self.igra.stanje_igre()
             self.koncaj_igro(zmagovalec, stirka)
+
+    def stanje_gumbov(self, tip, indikator=0):
+        '''Vklopi gumbe za power upe, če smo v pravi igri, sicer jih izklopi.'''
+        if tip == 3:
+            # Imamo power up igro, vklopi gumbe
+            if self.igra.na_potezi is not None:
+                if indikator == 0:
+                    if self.igra.powerups[self.igra.na_potezi-1][0]:
+                        self.gumb_pup1.config(state=tkinter.NORMAL)
+                    else:
+                        self.gumb_pup1.config(state=tkinter.DISABLED)
+                    if self.igra.powerups[self.igra.na_potezi-1][1]:
+                        self.gumb_pup2.config(state=tkinter.NORMAL)
+                    else:
+                        self.gumb_pup2.config(state=tkinter.DISABLED)
+                    if self.igra.powerups[self.igra.na_potezi-1][2]:
+                        self.gumb_pup3.config(state=tkinter.NORMAL)
+                    else:
+                        self.gumb_pup3.config(state=tkinter.DISABLED)
+                    if self.igra.powerups[self.igra.na_potezi-1][3]:
+                        self.gumb_pup4.config(state=tkinter.NORMAL)
+                    else:
+                        self.gumb_pup4.config(state=tkinter.DISABLED)
+                else:
+                    self.gumb_pup1.config(state=tkinter.NORMAL)
+                    self.gumb_pup2.config(state=tkinter.NORMAL)
+                    self.gumb_pup3.config(state=tkinter.NORMAL)
+                    self.gumb_pup4.config(state=tkinter.NORMAL)
+        else:
+            # Izklopi gumbe
+            self.gumb_pup1.config(state=tkinter.DISABLED)
+            self.gumb_pup2.config(state=tkinter.DISABLED)
+            self.gumb_pup3.config(state=tkinter.DISABLED)
+            self.gumb_pup4.config(state=tkinter.DISABLED)
 
     def uredi_ime(self, ime):
         text = ime.get()
