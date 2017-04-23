@@ -469,7 +469,6 @@ class Gui():
             j = 5 - int((y - d/2) // self.VELIKOST_POLJA) # BRIŠI?
             if isinstance(self.igra, Pop_logika) and j == 0:
                 i = -i
-            print(self.igra.sme_zmagati)
             if self.igra.na_potezi == IGRALEC_R:
                 self.igralec_r.klik(i)
             elif self.igra.na_potezi == IGRALEC_Y:
@@ -494,6 +493,8 @@ class Gui():
 ##                i = int((x - d/2) // self.VELIKOST_POLJA) + 21 + j*7
                 # Tole je za dvojno potezo brez zmage
                 i = int((x - d/2) // self.VELIKOST_POLJA) + 71
+##                # Tole je za dvojno potezo z zmago
+##                i = int((x - d/2) // self.VELIKOST_POLJA) + 81
                 print(i)
                 if self.igra.na_potezi == IGRALEC_R:
                     self.igralec_r.klik(i)
@@ -508,7 +509,10 @@ class Gui():
 
         # Razveljavimo prejšnjo potezo
         if isinstance(self.igralec_r, Racunalnik):
-            if self.igra.na_potezi == IGRALEC_R:
+            if isinstance(self.igralec_y, Racunalnik):
+                # Oba igralca sta računalnik, ne naredi ničesar
+                return
+            elif self.igra.na_potezi == IGRALEC_R:
                 # Na potezi računalnik, ne naredi ničesar
                 return
             elif self.igra.na_potezi == IGRALEC_Y:
@@ -551,7 +555,30 @@ class Gui():
         '''Uveljavimo zadnjo razveljavljeno potezo in se vrnemo v njeno stanje.'''
 
         # Uveljavimo prejšnjo potezo
-        novo_stanje = self.igra.uveljavi()
+        if isinstance(self.igralec_r, Racunalnik):
+            if isinstance(self.igralec_y, Racunalnik):
+                # Oba igralca sta računalnik, ne naredi ničesar
+                return
+            elif self.igra.na_potezi == IGRALEC_R:
+                # Na potezi računalnik, ne naredi ničesar
+                return
+            elif self.igra.na_potezi == IGRALEC_Y:
+                novo_stanje = self.igra.uveljavi(2)
+            else:
+                # Igre je konec
+                novo_stanje = self.igra.uveljavi(2)
+        elif isinstance(self.igralec_y, Racunalnik):
+            if self.igra.na_potezi == IGRALEC_Y:
+                # Na potezi računalnik, ne naredi ničesar
+                return
+            elif self.igra.na_potezi == IGRALEC_R:
+                novo_stanje = self.igra.uveljavi(2)
+            else:
+                # TODO
+                novo_stanje = self.igra.uveljavi(2)
+        else:
+            novo_stanje = self.igra.uveljavi()
+
 
         if novo_stanje: # Uspešno smo uveljavili potezo
             # Pobrišemo vse figure iz igralne površine

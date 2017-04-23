@@ -137,15 +137,6 @@ class Igra():
         else:
             return None
 
-    def razveljavi1(self):
-        # To metodo uporablja računalnik, ko preračunava poteze.
-        if len(self.zgodovina) > 0:
-            (self.polozaj, self.na_potezi) = self.zgodovina.pop()
-            self.stevilo_potez -= 1
-            return (self.polozaj, self.na_potezi)
-        else:
-            return None
-
     def shrani_polozaj(self):
         '''Shrani trenutni položaj igre, da se lahko vanj vrnemo
             s klicem metode 'razveljavi'.'''
@@ -177,14 +168,14 @@ class Igra():
             # Pravtako tudi zmagovalca ni, torej je rezultat neodločen
             return (NEODLOCENO, None)
 
-    def uveljavi(self):
+    def uveljavi(self, i=1):
         '''Uveljavi zadnjo razveljavljeno potezo in se vrne v njeno stanje.'''
-        if self.stevec < len(self.zgodovina)-1: # -1 začasno, dokler ne dodam zadnje poteze
-            self.stevec += 1
+        if self.stevec < len(self.zgodovina)-i: # -i začasno, dokler ne dodam zadnje poteze
+            self.stevec += i
             (self.polozaj, self.na_potezi) = self.zgodovina[self.stevec]
             return (self.polozaj, self.na_potezi)
-        elif self.stevec == len(self.zgodovina)-1:
-            self.stevec += 1
+        elif self.stevec == len(self.zgodovina)-i:
+            self.stevec += i
             (self.polozaj, self.na_potezi) = self.zadnja
             return (self.polozaj, self.na_potezi)
         else:
@@ -201,4 +192,8 @@ class Igra():
     def vrstica(self, i):
         for (j,b) in enumerate(self.polozaj[i]):
             if b == 0:
+                # Kličemo samo v primeru, ko imamo veljavno potezo,
+                # torej bo vedno obstajal tak b
                 return j
+        # Do tega ob pravilni uporabi ne bi smelo priti
+        return None
