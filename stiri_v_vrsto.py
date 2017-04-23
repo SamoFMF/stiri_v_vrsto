@@ -175,6 +175,7 @@ class Gui():
 
         # Določimo, kaj se zgodi, ko uporabnik pritisne določene tipke
         self.platno.bind('<Button-1>', self.platno_klik)
+        self.platno.bind('<Control-Button-1>', self.platno_klik_temp)
         self.platno.bind_all('<Control-z>', self.platno_razveljavi)
         self.platno.bind_all('<Control-y>', self.platno_uveljavi)
         self.platno.bind('<Configure>', self.spremeni_velikost)
@@ -468,6 +469,7 @@ class Gui():
             j = 5 - int((y - d/2) // self.VELIKOST_POLJA) # BRIŠI?
             if isinstance(self.igra, Pop_logika) and j == 0:
                 i = -i
+            print(self.igra.sme_zmagati)
             if self.igra.na_potezi == IGRALEC_R:
                 self.igralec_r.klik(i)
             elif self.igra.na_potezi == IGRALEC_Y:
@@ -475,6 +477,31 @@ class Gui():
             else:
                 # Nihče ni na potezi
                 pass
+
+    def platno_klik_temp(self, event):
+        # Začasni event, uporabljen za testiranje 'Powerup_logika'
+        (x,y) = (event.x, event.y)
+        d = self.VELIKOST_POLJA
+        if (x < d/2) or (x > 15*d/2) or (y < d/2) or (y > 13*d/2):
+            # V tem primeru smo zunaj igralnega območja
+            pass
+        else:
+            if isinstance(self.igra, Powerup_logika):
+##                # Tole je za teptanje stolpcev
+##                i = int((x - d/2) // self.VELIKOST_POLJA) + 11
+##                # Tole je za brisanje nasprotnikovih žetonov
+##                j = 5 - int((y - d/2) // self.VELIKOST_POLJA)
+##                i = int((x - d/2) // self.VELIKOST_POLJA) + 21 + j*7
+                # Tole je za dvojno potezo brez zmage
+                i = int((x - d/2) // self.VELIKOST_POLJA) + 71
+                print(i)
+                if self.igra.na_potezi == IGRALEC_R:
+                    self.igralec_r.klik(i)
+                elif self.igra.na_potezi == IGRALEC_Y:
+                    self.igralec_y.klik(i)
+                else:
+                    # Nihče ni na potezi
+                    pass
 
     def platno_razveljavi(self, event=None):
         '''Razveljavimo zadnjo potezo in prikažemo prejšnje stanje.'''
@@ -559,8 +586,8 @@ class Gui():
             # Poteza ni bila veljavna
             pass
         else:
-            (zmagovalec, stirka, p1, je_popout) = t # Tukaj je p1 dejanska poteza
-            if je_popout:
+            (zmagovalec, stirka, p1, osvezi) = t # Tukaj je p1 položaj na platnu
+            if osvezi:
                 self.platno.delete(Gui.TAG_FIGURA)
                 self.narisi_polozaj(self.igra.polozaj)
             else:
