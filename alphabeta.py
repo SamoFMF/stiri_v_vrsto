@@ -1,7 +1,7 @@
 import logging
 
 from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik, NEVELJAVNO
-from five_logika import five_logika
+from five_logika import Five_logika
 import random
 
 #######################
@@ -44,7 +44,7 @@ class AlphaBeta:
     def uredi_poteze(self, poteze):
         '''Uredi seznam potez, ki ga nato uporabimo v alphabeta.'''
         urejene_poteze = [] # Urejen seznam potez
-        if isinstance(self.igra, five_logika):
+        if isinstance(self.igra, Five_logika):
             # Imamo 5 v vrsto
             zeljen_vrstni_red = [1,-1,4,-4,7,-7] # Željen vrstni red, če so na voljo vse poteze
             zeljen_vrstni_red = random.sample(zeljen_vrstni_red, 6)
@@ -87,7 +87,7 @@ class AlphaBeta:
         else:
             a = 0.8 # Faktor za katerega mu je izguba manj vredna kot dobiček
             # Najprej preverimo ker tip igre imamo
-            if isinstance(self.igra, five_logika):
+            if isinstance(self.igra, Five_logika):
                 # Imamo 5 v vrsto, torej imamo zmagovalne štirke (robne)
                 # ter petke, pokličimo jih spodaj
                 stirke_R = self.igra.stirke_R

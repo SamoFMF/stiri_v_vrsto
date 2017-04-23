@@ -4,11 +4,11 @@
 
 from logika import *
 
-class pop_logika(Igra):
+class Pop_logika(Igra):
 
     def kopija(self):
         '''Vrne kopijo te igre, brez zgodovine.'''
-        k = pop_logika()
+        k = Pop_logika()
         k.polozaj = [self.polozaj[i][:] for i in range(7)]
         k.na_potezi = self.na_potezi
         k.stevilo_potez = self.stevilo_potez
@@ -48,14 +48,6 @@ class pop_logika(Igra):
             # Če pridemo do sem, so vsa polja zasedena in ni več veljavnih potez
             # Pravtako tudi zmagovalca ni, torej je rezultat neodločen
             return (NEODLOCENO, None)
-
-    def kopija(self):
-        '''Vrni kopijo te igre, brez zgodovine.'''
-        # Potrebujemo, da se ne rišejo poteze, ko računalnik razmišlja
-        k = pop_logika()
-        k.polozaj = [self.polozaj[i][:] for i in range(7)]
-        k.na_potezi = self.na_potezi
-        return k
 
     def veljavne_poteze(self):
         '''Vrne seznam veljavnih potez.'''

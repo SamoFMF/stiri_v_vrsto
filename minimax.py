@@ -1,7 +1,7 @@
 import logging
 
 from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik, NEVELJAVNO
-from five_logika import five_logika
+from five_logika import Five_logika
 import random
 
 #######################
@@ -55,7 +55,7 @@ class Minimax:
         else:
             a = 0.8 # Faktor za katerega mu je izguba manj vredna kot dobiček
             # Najprej preverimo ker tip igre imamo
-            if isinstance(self.igra, five_logika):
+            if isinstance(self.igra, Five_logika):
                 # Imamo 5 v vrsto, torej imamo zmagovalne štirke (robne)
                 # ter petke, pokličimo jih spodaj
                 stirke_R = self.igra.stirke_R

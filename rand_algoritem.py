@@ -5,7 +5,7 @@ import random
 ## ALGORITEM RANDOM ##
 ######################
 
-class rand_alg():
+class Rand_alg():
     # Preprost algoritem, ki izbere naključno potezo
 
     def __init__(self):

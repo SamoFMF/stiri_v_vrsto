@@ -2,12 +2,13 @@ import tkinter # Uvozimo tkinter za uporabniški vmesnik
 from math import sqrt
 
 from logika import *
+from pop_logika import *
+from five_logika import *
+from powerup_logika import *
 from clovek import *
 from racunalnik import *
 from rand_algoritem import *
 from minimax import *
-from pop_logika import *
-from five_logika import *
 from alphabeta import *
 
 #########################
@@ -55,7 +56,7 @@ class Gui():
 
         # Slovar 'tipov' igralcev
         self.tip_igralca = {0: lambda: Clovek(self),
-                               1: lambda: Racunalnik(self, rand_alg()),
+                               1: lambda: Racunalnik(self, Rand_alg()),
                                2: lambda: Racunalnik(self, AlphaBeta(2)),
                                3: lambda: Racunalnik(self, AlphaBeta(4)),
                                4: lambda: Racunalnik(self, AlphaBeta(6)),
@@ -64,8 +65,9 @@ class Gui():
 
         # Slovar 'tipov' igre
         self.tip_igre = {0: lambda: Igra(),
-                         1: lambda: five_logika(),
-                         2: lambda: pop_logika()}
+                         1: lambda: Five_logika(),
+                         2: lambda: Pop_logika(),
+                         3: lambda: Powerup_logika()}
 
         # Nastavimo imeni igralcev, ki jih lahko uporabnik nato spreminja
         self.ime_r = tkinter.StringVar() # Ime igralca z rdečimi žetoni
@@ -99,6 +101,9 @@ class Gui():
         menu_igra.add_radiobutton(label='Pop Out',
                                   variable=self.tip, value=2,
                                   command=lambda: self.naslednja_igra())
+        menu_igra.add_radiobutton(label='Power Up',
+                                  variable=self.tip, value=3,
+                                  command=lambda: self.naslednja_igra())
         menu_igra.add_separator()
         menu_igra.add_command(label='Izhod',
                               command=lambda: self.zapri_okno(master))
@@ -115,7 +120,7 @@ class Gui():
         menu_rdeci.add_radiobutton(label='Človek',
                                    variable=self.tip_rdeci, value=0,
                                    command=lambda: self.zacni_igro(True))
-        menu_igra.add_separator()
+        menu_rdeci.add_separator()
         menu_rdeci.add_radiobutton(label='Računalnik - naključen',
                                    variable=self.tip_rdeci, value=1,
                                    command=lambda: self.zacni_igro(True))
@@ -138,7 +143,7 @@ class Gui():
         menu_rumeni.add_radiobutton(label='Človek',
                                    variable=self.tip_rumeni, value=0,
                                    command=lambda: self.zacni_igro(True))
-        menu_igra.add_separator()
+        menu_rumeni.add_separator()
         menu_rumeni.add_radiobutton(label='Računalnik - naključen',
                                    variable=self.tip_rumeni, value=1,
                                    command=lambda: self.zacni_igro(True))
@@ -349,7 +354,7 @@ class Gui():
                 elif b == IGRALEC_Y:
                     self.narisi_Y((i,j))
 
-        if isinstance(self.igra, five_logika):
+        if isinstance(self.igra, Five_logika):
             self.narisi_crtice()
 
     def narisi_crtice(self):
@@ -461,7 +466,7 @@ class Gui():
             # TODO - preveri za robne pogoje
             i = int((x - d/2) // self.VELIKOST_POLJA) + 1
             j = 5 - int((y - d/2) // self.VELIKOST_POLJA) # BRIŠI?
-            if isinstance(self.igra, pop_logika) and j == 0:
+            if isinstance(self.igra, Pop_logika) and j == 0:
                 i = -i
             if self.igra.na_potezi == IGRALEC_R:
                 self.igralec_r.klik(i)
@@ -554,8 +559,6 @@ class Gui():
             # Poteza ni bila veljavna
             pass
         else:
-            # Premisli še, če res potrebuješ cel p, ali lahko spremeniš,
-            # da bodo funkcije vračale le x koordinato
             (zmagovalec, stirka, p1, je_popout) = t # Tukaj je p1 dejanska poteza
             if je_popout:
                 self.platno.delete(Gui.TAG_FIGURA)
@@ -571,10 +574,8 @@ class Gui():
                 # Igre še ni konec
                 self.narisi_platno_menu()
                 if self.igra.na_potezi == IGRALEC_R:
-                    #self.napis.set('Na potezi je RDEČI!')
                     self.igralec_r.igraj()
                 elif self.igra.na_potezi == IGRALEC_Y:
-                    #self.napis.set('Na potezi je RUMENI!')
                     self.igralec_y.igraj()
             else:
                 # Igra se je končala
@@ -626,7 +627,7 @@ class Gui():
         # Ustvarimo novo igro
         self.igra = self.tip_igre[self.tip.get()]()
 
-        if isinstance(self.igra, five_logika):
+        if isinstance(self.igra, Five_logika):
             self.narisi_crtice()
 
         # Dodamo spremenljive elemente v platno_menu

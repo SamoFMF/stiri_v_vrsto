@@ -82,7 +82,6 @@ class Igra():
     def povleci_potezo(self, p):
         '''Povleci potezo p, če je veljavna, sicer ne naredi nič.
             Veljavna igra -> vrne stanje_igre() po potezi, sicer None.'''
-        #(i,j) = p # Igrana poteza
         poteze = self.veljavne_poteze()
         je_popout = False
 

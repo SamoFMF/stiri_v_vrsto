@@ -4,7 +4,7 @@
 
 from logika import *
 
-class five_logika(Igra):
+class Five_logika(Igra):
     # Tabela vseh možnih zmagovalnih kombinacij 4 v vrsto
     stirke_R = [
         [(0,1), (1,2), (2,3), (3,4)],
@@ -41,7 +41,7 @@ class five_logika(Igra):
     def kopija(self):
         '''Vrni kopijo te igre, brez zgodovine.'''
         # Potrebujemo, da se ne rišejo poteze, ko računalnik razmišlja
-        k = five_logika()
+        k = Five_logika()
         k.polozaj = [self.polozaj[i][:] for i in range(7)]
         k.na_potezi = self.na_potezi
         k.stevilo_potez = self.stevilo_potez
@@ -54,20 +54,20 @@ class five_logika(Igra):
             - (NEODLOCENO, None), če je igre konec in je neodločeno,
             - (NI_KONEC, None), če je igra še vedno v teku.'''
         # Najprej preverimo, če obstaja kakšna zmagovalna štirka
-        for s in five_logika.stirke_R:
+        for s in Five_logika.stirke_R:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
             barva = self.polozaj[i1][j1]
             if (barva == IGRALEC_R) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
                 # s je naša zmagovalna štirka
                 return (barva, [s])
-        for s in five_logika.stirke_Y:
+        for s in Five_logika.stirke_Y:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
             barva = self.polozaj[i1][j1]
             if (barva == IGRALEC_Y) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
                 # s je naša zmagovalna štirka
                 return (barva, [s])
         # Preverimo še sedaj, če obstaja zmagovalna petka
-        for p in five_logika.petke:
+        for p in Five_logika.petke:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4), (i5,j5)) = p
             barva = self.polozaj[i1][j1]
             if (barva != PRAZNO) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4] == self.polozaj[i5][j5]):
