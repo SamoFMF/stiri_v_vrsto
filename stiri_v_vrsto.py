@@ -708,39 +708,69 @@ class Gui():
     
     def povleci_potezo(self, p):
         igralec = self.igra.na_potezi
-        t = self.igra.povleci_potezo(p)
-
-        if t is None:
-            # Poteza ni bila veljavna
-            pass
-        else:
-            if isinstance(self.igra, Powerup_logika) and self.pup.get() > 0:
-                # Če imamo Power Up igro in smo povlekli potezo,
-                # želimo sedaj odizbrati powerup, če smo ga igrali
-                self.pup.set(0)
-                self.pup_pomozni = 0
-            (zmagovalec, stirka, p1, osvezi) = t # Tukaj je p1 položaj na platnu
-            if osvezi:
-                self.platno.delete(Gui.TAG_FIGURA)
-                self.narisi_polozaj(self.igra.polozaj)
+        if isinstance(p, list):
+            # Imamo dvojno potezo, ki jo je povlekel računalnik
+            t1 = self.igra.povleci_potezo(p[0])
+            t2 = self.igra.povleci_potezo(p[1])
+            if (t1 is None) or (t2 is None):
+                # Imamo neveljavno potezo
+                # To se sicer računalniku ne bi smelo nikoli zgoditi
+                pass
             else:
+                (zmagovalec1, stirka1, p1, osvezi1) = t1
+                (zmagovalec2, stirka2, p2, osvezi2) = t2
                 if igralec == IGRALEC_R:
                     self.narisi_R(p1)
+                    self.narisi_R(p2)
                 elif igralec == IGRALEC_Y:
                     self.narisi_Y(p1)
+                    self.narisi_Y(p2)
 
-            # Sedaj pa preverimo, kako se bo igra nadaljevala
-            if zmagovalec == NI_KONEC:
-                # Igre še ni konec
-                self.narisi_platno_menu()
-                self.stanje_gumbov(self.tip.get())
-                if self.igra.na_potezi == IGRALEC_R:
-                    self.igralec_r.igraj()
-                elif self.igra.na_potezi == IGRALEC_Y:
-                    self.igralec_y.igraj()
+                # Preverimo, kako se bo igra nadaljevala
+                if zmagovalec2 == NI_KONEC:
+                    # Igre še ni konec
+                    self.narisi_platno_menu()
+                    self.stanje_gumbov(self.tip.get())
+                    if self.igra.na_potezi == IGRALEC_R:
+                        self.igralec_r.igraj()
+                    elif self.igra.na_potezi == IGRALEC_Y:
+                        self.igralec_y.igraj()
+                else:
+                    # Igra se je končala
+                    self.koncaj_igro(zmagovalec, stirka)
+        else:
+            t = self.igra.povleci_potezo(p)
+            if t is None:
+                # Poteza ni bila veljavna
+                pass
             else:
-                # Igra se je končala
-                self.koncaj_igro(zmagovalec, stirka)
+                if self.pup.get() > 0:
+                    # Če imamo izbran kak power up, ga po tem,
+                    # ko povlečemo potezo, unselectamo
+                    self.pup.set(0)
+                    self.pup_pomozni = 0
+                (zmagovalec, stirka, p1, osvezi) = t # Tukaj je p1 položaj na platnu
+                if osvezi:
+                    self.platno.delete(Gui.TAG_FIGURA)
+                    self.narisi_polozaj(self.igra.polozaj)
+                else:
+                    if igralec == IGRALEC_R:
+                        self.narisi_R(p1)
+                    elif igralec == IGRALEC_Y:
+                        self.narisi_Y(p1)
+
+                # Sedaj pa preverimo, kako se bo igra nadaljevala
+                if zmagovalec == NI_KONEC:
+                    # Igre še ni konec
+                    self.narisi_platno_menu()
+                    self.stanje_gumbov(self.tip.get())
+                    if self.igra.na_potezi == IGRALEC_R:
+                        self.igralec_r.igraj()
+                    elif self.igra.na_potezi == IGRALEC_Y:
+                        self.igralec_y.igraj()
+                else:
+                    # Igra se je končala
+                    self.koncaj_igro(zmagovalec, stirka)
     
     def prekini_igralce(self):
         '''Sporoči igralcem, da morajo nehati razmišljati.'''

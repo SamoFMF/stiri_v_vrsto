@@ -56,15 +56,17 @@ class AlphaBeta:
                     zeljen_vrstni_red.append(j)
         elif isinstance(self.igra, Powerup_logika):
             # Imamo Power Up igro
-
-            # Najprej dodajmo dvojne poteze z možno zmago
-            zeljen_vrstni_red = [84]
-            for i in range(1,4):
-                zeljen_vrstni_red += random.sample([84+i, 84-i], 2)
+            
             # Dodajmo dvojne poteze brez možnosti zmage
-            zeljen_vrstni_red.append(74)
+            # Najprej dodamo te, ker če bi takšne z možnostjo zmage,
+            # bi jih (lahek) algoritem že na začetku porabil
+            zeljen_vrstni_red = [74]
             for i in range(1,4):
                 zeljen_vrstni_red += random.sample([74+i, 74-i], 2)
+            # Dodajmo dvojne poteze z možno zmago
+            zeljen_vrstni_red.append(84)
+            for i in range(1,4):
+                zeljen_vrstni_red += random.sample([84+i, 84-i], 2)
             # Dodajmo 'navadne' poteze
             zeljen_vrstni_red.append(4)
             for i in range(1,4):
@@ -245,31 +247,69 @@ class AlphaBeta:
                 if maksimiziramo:
                     # Maksimiziramo
                     najboljsa_poteza = None
-                    for p in self.uredi_poteze(self.igra.veljavne_poteze()):
+                    poteze = self.uredi_poteze(self.igra.veljavne_poteze())
+                    for p in poteze:
                         self.igra.povleci_potezo(p)
-                        vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
-                        self.igra.razveljavi()
-                        if vrednost > alpha:
-                            najboljsa_poteza = p
-                            alpha = vrednost
-                        if najboljsa_poteza is None:
-                            najboljsa_poteza = p
-                        if beta <= alpha:
-                            break
+                        if p > 70:
+                            # Imamo dvojno potezo
+                            poteze2 = self.uredi_poteze(self.igra.veljavne_poteze())
+                            for p2 in poteze2:
+                                self.igra.povleci_potezo(p)
+                                vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
+                                self.igra.razveljavi()
+                                if vrednost > alpha:
+                                    najboljsa_poteza = [p, p2]
+                                    alpha = vrednost
+                                if najboljsa_poteza is None:
+                                    najboljsa_poteza = [p, p2]
+                                if beta <= alpha:
+                                    break
+                            self.igra.razveljavi()
+                            if beta <= alpha:
+                                break
+                        else:
+                            vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
+                            self.igra.razveljavi()
+                            if vrednost > alpha:
+                                najboljsa_poteza = p
+                                alpha = vrednost
+                            if najboljsa_poteza is None:
+                                najboljsa_poteza = p
+                            if beta <= alpha:
+                                break
                 else:
                     # Minimiziramo
                     najboljsa_poteza = None
-                    for p in self.uredi_poteze(self.igra.veljavne_poteze()):
+                    poteze = self.uredi_poteze(self.igra.veljavne_poteze())
+                    for p in poteze:
                         self.igra.povleci_potezo(p)
-                        vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
-                        self.igra.razveljavi()
-                        if vrednost < beta:
-                            najboljsa_poteza = p
-                            beta = vrednost
-                        if najboljsa_poteza is None:
-                            najboljsa_poteza = p
-                        if beta <= alpha:
-                            break
+                        if p > 70:
+                            # Imamo dvojno potezo
+                            poteze2 = self.uredi_poteze(self.igra.veljavne_poteze())
+                            for p2 in poteze2:
+                                self.igra.povleci_potezo(p)
+                                vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
+                                self.igra.razveljavi()
+                                if vrednost < beta:
+                                    najboljsa_poteza = [p, p2]
+                                    beta = vrednost
+                                if najboljsa_poteza is None:
+                                    najboljsa_poteza = [p, p2]
+                                if beta <= alpha:
+                                    break
+                            self.igra.razveljavi()
+                            if beta <= alpha:
+                                break
+                        else:
+                            vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
+                            self.igra.razveljavi()
+                            if vrednost < beta:
+                                najboljsa_poteza = p
+                                beta = vrednost
+                            if najboljsa_poteza is None:
+                                najboljsa_poteza = p
+                            if beta <= alpha:
+                                break
                 assert (najboljsa_poteza is not None), 'alphabeta: izračunana poteza je None, veljavne_poteze={0}'.format(self.igra.veljavne_poteze())
                 return (najboljsa_poteza, alpha if maksimiziramo else beta)
         else:

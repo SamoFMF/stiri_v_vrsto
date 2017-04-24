@@ -44,7 +44,7 @@ class Powerup_logika(Igra):
         k.polozaj = [self.polozaj[i][:] for i in range(7)]
         k.na_potezi = self.na_potezi
         k.stevilo_potez = self.stevilo_potez
-        k.powerups = self.powerups
+        k.powerups = [self.powerups[i][:] for i in range(2)]
         k.sme_zmagati = self.sme_zmagati
         k.dvojna_poteza = self.dvojna_poteza
         return k
@@ -53,6 +53,9 @@ class Powerup_logika(Igra):
         '''Povleci potezo p, če je veljavna, sicer ne naredi nič.
             Veljavna igra -> vrne stanje_igre() po potezi, sicer None.'''
         poteze = self.veljavne_poteze()
+        if p not in poteze:
+            #print('poteze = {0}, p = {1}'.format(poteze, p))
+            pass
         osvezi = False # Če moramo osvežiti igralno površino, ker smo izbrisali kakšne žetone
 
         # Preverimo, če je poteza veljavna
