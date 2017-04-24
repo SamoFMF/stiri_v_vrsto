@@ -5,6 +5,7 @@ from logika import *
 from pop_logika import *
 from five_logika import *
 from powerup_logika import *
+from pop10_logika import *
 from clovek import *
 from racunalnik import *
 from rand_algoritem import *
@@ -72,7 +73,8 @@ class Gui():
         self.tip_igre = {0: lambda: Igra(),
                          1: lambda: Five_logika(),
                          2: lambda: Pop_logika(),
-                         3: lambda: Powerup_logika()}
+                         3: lambda: Powerup_logika(),
+                         4: lambda: Pop10_logika()}
 
         # Nastavimo imeni igralcev, ki jih lahko uporabnik nato spreminja
         self.ime_r = tkinter.StringVar() # Ime igralca z rdečimi žetoni
@@ -110,6 +112,9 @@ class Gui():
                                   command=lambda: self.naslednja_igra())
         menu_igra.add_radiobutton(label='Power Up',
                                   variable=self.tip, value=3,
+                                  command=lambda: self.naslednja_igra())
+        menu_igra.add_radiobutton(label='Pop 10',
+                                  variable=self.tip, value=4,
                                   command=lambda: self.naslednja_igra())
         menu_igra.add_separator()
         menu_igra.add_command(label='Izhod',
