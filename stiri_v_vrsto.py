@@ -822,6 +822,9 @@ class Gui():
         # Ustvarimo novo igro
         self.igra = self.tip_igre[self.tip.get()]()
 
+        # Nastavimo aktivnost gumbov za 'power up'-e
+        self.stanje_gumbov(self.tip.get())
+
         if isinstance(self.igra, Five_logika):
             self.narisi_crtice()
 
