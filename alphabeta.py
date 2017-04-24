@@ -255,7 +255,7 @@ class AlphaBeta:
                             poteze2 = self.uredi_poteze(self.igra.veljavne_poteze())
                             for p2 in poteze2:
                                 self.igra.povleci_potezo(p)
-                                vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
+                                vrednost = self.alphabeta(max(globina-2, 0), alpha, beta, not maksimiziramo)[1]
                                 self.igra.razveljavi()
                                 if vrednost > alpha:
                                     najboljsa_poteza = [p, p2]
@@ -288,7 +288,7 @@ class AlphaBeta:
                             poteze2 = self.uredi_poteze(self.igra.veljavne_poteze())
                             for p2 in poteze2:
                                 self.igra.povleci_potezo(p)
-                                vrednost = self.alphabeta(globina-1, alpha, beta, not maksimiziramo)[1]
+                                vrednost = self.alphabeta(max(globina-2, 0), alpha, beta, not maksimiziramo)[1]
                                 self.igra.razveljavi()
                                 if vrednost < beta:
                                     najboljsa_poteza = [p, p2]

@@ -737,7 +737,7 @@ class Gui():
                         self.igralec_y.igraj()
                 else:
                     # Igra se je končala
-                    self.koncaj_igro(zmagovalec, stirka)
+                    self.koncaj_igro(zmagovalec2, stirka2)
         else:
             t = self.igra.povleci_potezo(p)
             if t is None:
