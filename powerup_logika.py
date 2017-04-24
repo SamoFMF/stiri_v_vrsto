@@ -204,13 +204,21 @@ class Powerup_logika(Igra):
         if self.powerups[kateri_igr][2] == 1:
             for (i,a) in enumerate(self.polozaj):
                 if a[-1] == 0:
-                    poteze.append(71+i)
+                    zmagovalec = self.ima_zmagovalca(i+1)
+                    if zmagovalec is None:
+                        # Preverimo, da poteza ni zmagovalna, če je,
+                        # je to kar navadna poteza, saj bo konec preden naredimo dvojno
+                        poteze.append(71+i)
 
         # Dodajmo poteze, kjer bo naslednja poteza zaporedna z možnostjo zmage
         # Označimo jih z 81-88
         if self.powerups[kateri_igr][3] == 1:
             for (i,a) in enumerate(self.polozaj):
                 if a[-1] == 0:
-                    poteze.append(81+i)
+                    zmagovalec = self.ima_zmagovalca(i+1)
+                    if zmagovalec is None:
+                        # Preverimo, da poteza ni zmagovalna, če je,
+                        # je to kar navadna poteza, saj bo konec preden naredimo dvojno
+                        poteze.append(81+i)
         
         return poteze
