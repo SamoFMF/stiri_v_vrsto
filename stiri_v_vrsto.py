@@ -437,6 +437,48 @@ class Gui():
                                                       Gui.SIRINA_PLATNO_MENU - 10 - stranica,
                                                       5 * Gui.VISINA_PLATNO_MENU / 6 + stranica,
                                                       fill='white', tag=Gui.TAG_SPREMENLJIVI)
+            elif isinstance(self.igra, Pop10_logika):
+                # Dodajmo grafični prikaz odstranjenih žetonov
+                premer = Gui.SIRINA_PLATNO_MENU * 0.7 / 6
+                # Za rdečega igralca
+                self.platno_menu.create_oval(20, 15 + 2.5*dy,
+                                             20 + premer, 15 + 2.5*dy + premer,
+                                             fill='red', tag=Gui.TAG_SPREMENLJIVI)
+                self.platno_menu.create_text(20 + premer / 2, 15 + 2.5*dy + premer / 2,
+                                             text='{0}'.format(self.igra.odstranjeni[0]),
+                                             fill='white', anchor=tkinter.CENTER,
+                                             font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/15)),
+                                                   'bold'),
+                                             tag=Gui.TAG_SPREMENLJIVI)
+
+                # Za rumenega igralca
+                self.platno_menu.create_oval(Gui.SIRINA_PLATNO_MENU - 20, 15 + 2.5*dy,
+                                             Gui.SIRINA_PLATNO_MENU - 20 - premer, 15 + 2.5*dy + premer,
+                                             fill='yellow', tag=Gui.TAG_SPREMENLJIVI)
+                self.platno_menu.create_text(Gui.SIRINA_PLATNO_MENU - 20 - premer / 2,
+                                             15 + 2.5*dy + premer / 2,
+                                             text='{0}'.format(self.igra.odstranjeni[1]),
+                                             fill='black', anchor=tkinter.CENTER,
+                                             font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/15)),
+                                                   'bold'),
+                                             tag=Gui.TAG_SPREMENLJIVI)
+                if self.igra.faza == 1:
+                    self.platno_menu.create_text(Gui.SIRINA_PLATNO_MENU / 2, Gui.VISINA_PLATNO_MENU,
+                                                 text='Odstranite žeton!', fill='white',
+                                                 anchor=tkinter.S,
+                                                 font=('Helvetica',
+                                                       '{0}'.format(int(Gui.VISINA_PLATNO_MENU/20)),
+                                                       'bold'),
+                                                 tag=Gui.TAG_SPREMENLJIVI)
+                elif self.igra.faza == 2:
+                    self.platno_menu.create_text(Gui.SIRINA_PLATNO_MENU / 2, Gui.VISINA_PLATNO_MENU,
+                                                 text='Vstavite žeton!', fill='white',
+                                                 anchor=tkinter.S,
+                                                 font=('Helvetica',
+                                                       '{0}'.format(int(Gui.VISINA_PLATNO_MENU/20)),
+                                                       'bold'),
+                                                 tag=Gui.TAG_SPREMENLJIVI)
+                                             
 
     def narisi_polozaj(self, polozaj): # Premisli, če rabiš polozaj
         for (i, a) in enumerate(polozaj):
@@ -741,6 +783,11 @@ class Gui():
                 if osvezi:
                     self.platno.delete(Gui.TAG_FIGURA)
                     self.narisi_polozaj(self.igra.polozaj)
+                elif isinstance(self.igra, Pop10_logika) and self.igra.faza == 0:
+                    if igralec == IGRALEC_R:
+                        self.narisi_Y(p1)
+                    elif igralec == IGRALEC_Y:
+                        self.narisi_R(p1)
                 else:
                     if igralec == IGRALEC_R:
                         self.narisi_R(p1)

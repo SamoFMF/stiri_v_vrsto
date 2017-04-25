@@ -132,7 +132,7 @@ class AlphaBeta:
             # Sem ne bi smeli nikoli priti zaradi if stavkov v alphabeta
             return vrednost
         else:
-            a = 0.8 # Faktor za katerega mu je izguba manj vredna kot dobiček
+            delez = 0.8 # Faktor za katerega mu je izguba manj vredna kot dobiček
             # Najprej preverimo ker tip igre imamo
             if isinstance(self.igra, Five_logika):
                 # Imamo 5 v vrsto, torej imamo zmagovalne štirke (robne)
@@ -157,7 +157,7 @@ class AlphaBeta:
                         continue
                     else:
                         tocke[0] += 0.2 + stirka.count(IGRALEC_R) / 5
-                        tocke[1] -= a * (0.2 + stirka.count(IGRALEC_R) / 5)
+                        tocke[1] -= delez * (0.2 + stirka.count(IGRALEC_R) / 5)
                 for s in stirke_Y: # Štirke na voljo rumenemu
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                     stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
@@ -166,7 +166,7 @@ class AlphaBeta:
                         continue
                     else:
                         tocke[1] += 0.2 + stirka.count(IGRALEC_Y) / 5
-                        tocke[0] -= a * (0.2 + stirka.count(IGRALEC_Y) / 5)
+                        tocke[0] -= delez * (0.2 + stirka.count(IGRALEC_Y) / 5)
 
                 for p in petke:
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4),(i5,j5)) = p
@@ -180,10 +180,10 @@ class AlphaBeta:
                             b = list(set(barve) - set([PRAZNO]))[0]
                             if b == IGRALEC_R:
                                 tocke[0] += petka.count(b) / 5
-                                tocke[1] -= a * (petka.count(b) / 5)
+                                tocke[1] -= delez * (petka.count(b) / 5)
                             else:
                                 tocke[1] += petka.count(b) / 5
-                                tocke[0] -= a * (petka.count(b) / 5)
+                                tocke[0] -= delez * (petka.count(b) / 5)
                         else:
                             # V petki so rdeči in rumeni
                             continue
@@ -194,6 +194,24 @@ class AlphaBeta:
                     else:
                         # V petki so rumeni in rdeči žetoni
                         continue
+            elif isinstance(self.igra, Pop10_logika):
+                # Naš cilj tukaj je, da bi imeli čim več štirk
+                tocke = [0, 0]
+                vrednost_stirke = AlphaBeta.ZMAGA / 3 # Da ne bomo nikoli imeli > ZMAGA brez da smo zmagali. Zo je vbistvu vrednost zmagovalne štirke.
+                for s in self.igra.stirke:
+                    ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
+                    stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
+                              self.igra.polozaj[i3][j3], self.igra.polozaj[i4][j4]]
+                    tr = stirka.count(IGRALEC_R) / 4 / (10-self.igra.odstranjeni[0]) # Točke rdeči
+                    ty = stirka.count(IGRALEC_R) / 4 / (10-self.igra.odstranjeni[1]) # Točke rumeni
+                    tocke[0] += tr - delez*ty
+                    tocke[1] += ty - delez*tr
+                if self.jaz == IGRALEC_R:
+                    vrednost += tocke[0] * vrednost_stirke
+                elif self.jaz == IGRALEC_Y:
+                    vrednost += tocke[1] * vrednost_stirke
+                vrednost *= 0.984**(max(self.igra.stevilo_potez - 42, 0))
+                return vrednost
             else:
                 # Imamo normalno ali popout igro, torej so štirke definirane sledeče
                 stirke = self.igra.stirke
@@ -216,10 +234,10 @@ class AlphaBeta:
                             b = list(set(barve) - set([PRAZNO]))[0]
                             if b == IGRALEC_R:
                                 tocke[0] += stirka.count(b) / 4
-                                tocke[1] -= a * (stirka.count(b) / 4)
+                                tocke[1] -= delez * (stirka.count(b) / 4)
                             else:
                                 tocke[1] += stirka.count(b) / 4
-                                tocke[0] -= a * (stirka.count(b) / 4)
+                                tocke[0] -= delez * (stirka.count(b) / 4)
                         else:
                             continue
                     elif barve == [PRAZNO]:
