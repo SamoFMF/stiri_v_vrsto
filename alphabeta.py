@@ -4,6 +4,7 @@ from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotni
 from five_logika import Five_logika
 from powerup_logika import Powerup_logika
 from pop10_logika import Pop10_logika
+from pop_logika import Pop_logika
 import random
 
 #######################
@@ -157,7 +158,6 @@ class AlphaBeta:
                         continue
                     else:
                         tocke[0] += 0.2 + stirka.count(IGRALEC_R) / 5
-                        tocke[1] -= delez * (0.2 + stirka.count(IGRALEC_R) / 5)
                 for s in stirke_Y: # Štirke na voljo rumenemu
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                     stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
@@ -166,8 +166,6 @@ class AlphaBeta:
                         continue
                     else:
                         tocke[1] += 0.2 + stirka.count(IGRALEC_Y) / 5
-                        tocke[0] -= delez * (0.2 + stirka.count(IGRALEC_Y) / 5)
-
                 for p in petke:
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4),(i5,j5)) = p
                     petka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
@@ -180,10 +178,8 @@ class AlphaBeta:
                             b = list(set(barve) - set([PRAZNO]))[0]
                             if b == IGRALEC_R:
                                 tocke[0] += petka.count(b) / 5
-                                tocke[1] -= delez * (petka.count(b) / 5)
                             else:
                                 tocke[1] += petka.count(b) / 5
-                                tocke[0] -= delez * (petka.count(b) / 5)
                         else:
                             # V petki so rdeči in rumeni
                             continue
@@ -197,31 +193,29 @@ class AlphaBeta:
             elif isinstance(self.igra, Pop10_logika):
                 # Naš cilj tukaj je, da bi imeli čim več štirk
                 tocke = [0, 0]
-                vrednost_stirke = AlphaBeta.ZMAGA / 3 # Da ne bomo nikoli imeli > ZMAGA brez da smo zmagali. Zo je vbistvu vrednost zmagovalne štirke.
+                vrednost_stirke = AlphaBeta.ZMAGA / 30 # Da ne bomo nikoli imeli > ZMAGA brez da smo zmagali. Zo je vbistvu vrednost zmagovalne štirke.
                 for s in self.igra.stirke:
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                     stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
                               self.igra.polozaj[i3][j3], self.igra.polozaj[i4][j4]]
-                    tr = stirka.count(IGRALEC_R) / 4 / (10-self.igra.odstranjeni[0]) # Točke rdeči
-                    ty = stirka.count(IGRALEC_R) / 4 / (10-self.igra.odstranjeni[1]) # Točke rumeni
-                    tocke[0] += tr - delez*ty
-                    tocke[1] += ty - delez*tr
+                    tocke[0] += stirka.count(IGRALEC_R) / 4 / (10-self.igra.odstranjeni[0])
+                    tocke[1] += stirka.count(IGRALEC_Y) / 4 / (10-self.igra.odstranjeni[1])
+                razlika = (self.igra.odstranjeni[0] - self.igra.odstranjeni[1]) * AlphaBeta.ZMAGA / 10
                 if self.jaz == IGRALEC_R:
-                    vrednost += tocke[0] * vrednost_stirke
+                    vrednost += (tocke[0] - delez*tocke[1]) * vrednost_stirke + razlika
                 elif self.jaz == IGRALEC_Y:
-                    vrednost += tocke[1] * vrednost_stirke
-                vrednost *= 0.984**(max(self.igra.stevilo_potez - 42, 0))
+                    vrednost += (tocke[1] - delez*tocke[0]) * vrednost_stirke - razlika
+                vrednost *= 0.984**(max(self.igra.stevilo_potez - 42, 0)) if vrednost > 0 else 1
                 return vrednost
             else:
-                # Imamo normalno ali popout igro, torej so štirke definirane sledeče
-                stirke = self.igra.stirke
+                # Imamo normalno, popout ali powerup igro
                 # Pojdimo sedaj skozi vse možne zmagovalne štirke in jih
                 # primerno ovrednotimo
                 # Stirke, ki ze vsebujejo zetone obeh igralec so vredne 0 tock
                 # Prazne stirke so vredne 0.1 tocke
                 # Ostale so vredne a/4 tock, kjer je a stevilo zetonov znotraj stirke
                 tocke = [0, 0] # Sem bomo shranili stevilo tock igralcev [R,Y]
-                for s in stirke:
+                for s in self.igra.stirke:
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                     stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
                              self.igra.polozaj[i3][j3], self.igra.polozaj[i4][j4]]
@@ -234,10 +228,8 @@ class AlphaBeta:
                             b = list(set(barve) - set([PRAZNO]))[0]
                             if b == IGRALEC_R:
                                 tocke[0] += stirka.count(b) / 4
-                                tocke[1] -= delez * (stirka.count(b) / 4)
                             else:
                                 tocke[1] += stirka.count(b) / 4
-                                tocke[0] -= delez * (stirka.count(b) / 4)
                         else:
                             continue
                     elif barve == [PRAZNO]:
@@ -250,11 +242,16 @@ class AlphaBeta:
                     
             (dos1, dos2) = tocke
             if self.jaz == IGRALEC_R:
-                vrednost += (dos1 - dos2) / 69 * 0.1 * AlphaBeta.ZMAGA
+                vrednost += (dos1 - delez*dos2) / 69 * 0.1 * AlphaBeta.ZMAGA
             else:
-                vrednost += (dos2 - dos1) / 69 * 0.1 * AlphaBeta.ZMAGA
-            # Tukaj opazimo, da pri Pop Out lahko pride, da množimo z negativno vrednostjo
-            vrednost *= 1 - self.igra.stevilo_potez / (2*6*7)
+                vrednost += (dos2 - delez*dos1) / 69 * 0.1 * AlphaBeta.ZMAGA
+            if isinstance(self.igra, Pop_logika):
+                k = 0.984**self.igra.stevilo_potez
+            elif isinstance(self.igra, Powerup_logika):
+                k = 1 - self.igra.stevilo_potez / (2*58)
+            else:
+                k = 1 - self.igra.stevilo_potez / (2*6*7)
+            vrednost *= k
         return int(vrednost)
 
     def alphabeta(self, globina, alpha, beta, maksimiziramo):
@@ -267,8 +264,19 @@ class AlphaBeta:
         if zmagovalec in (IGRALEC_R, IGRALEC_Y, NEODLOCENO):
             # Tukaj opazimo, da pri Pop Out lahko pride do tega, da je k < 0
             # Premisli, kaj storiti
-            k = 1 - self.igra.stevilo_potez / (2*6*7)
+            if isinstance(self.igra, Pop10_logika):
+                if zmagovalec == self.jaz:
+                    k = 0.984**(max(self.igra.stevilo_potez - 42, 0))
+                else:
+                    k = 1
+            elif isinstance(self.igra, Pop_logika):
+                k = 0.984**self.igra.stevilo_potez
+            elif isinstance(self.igra, Powerup_logika):
+                k = 1 - self.igra.stevilo_potez / (2*58) # Kjer je 58 max število potez v tej igri
+            else:
+                k = 1 - self.igra.stevilo_potez / (2*6*7)
             # Igre je konec, vrnemo njeno vrednost
+            self.k = k # začasno
             if zmagovalec == self.jaz:
                 return (None, AlphaBeta.ZMAGA * k)
             elif zmagovalec == nasprotnik(self.jaz):
