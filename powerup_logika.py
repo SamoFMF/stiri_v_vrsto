@@ -121,9 +121,9 @@ class Powerup_logika(Igra):
     def razveljavi(self, i=1):
         '''Razveljavi potezo in se vrne v prejšnje stanje.'''
         if self.stevec > i-1:
-            (self.polozaj, self.na_potezi, self.powerups,
-             self.sme_zmagati, self.dvojna_poteza) = self.zgodovina[self.stevec-i]
             self.stevec -= i
+            (self.polozaj, self.na_potezi, self.powerups,
+             self.sme_zmagati, self.dvojna_poteza) = self.zgodovina[self.stevec]
             self.stevilo_potez -= i
             return (self.polozaj, self.na_potezi)
         else:
@@ -145,11 +145,13 @@ class Powerup_logika(Igra):
             self.stevec += i
             (self.polozaj, self.na_potezi, self.powerups,
              self.sme_zmagati, self.dvojna_poteza) = self.zgodovina[self.stevec]
+            self.stevilo_potez += i
             return (self.polozaj, self.na_potezi)
         elif self.stevec == len(self.zgodovina)-i:
             self.stevec += i
             (self.polozaj, self.na_potezi, self.powerups,
              self.sme_zmagati, self.dvojna_poteza) = self.zadnja
+            self.stevilo_potez += i
             return (self.polozaj, self.na_potezi)
         else:
             return None

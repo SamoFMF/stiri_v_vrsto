@@ -3,6 +3,7 @@ import logging
 from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik, NEVELJAVNO
 from five_logika import Five_logika
 from powerup_logika import Powerup_logika
+from pop10_logika import Pop10_logika
 import random
 
 #######################
@@ -80,6 +81,25 @@ class AlphaBeta:
             for i in range(1,4):
                 dodajamo = [24+i+7*j for j in range(6)] + [24-i+7*j for j in range(6)]
                 zeljen_vrstni_red += random.sample(dodajamo, 12)
+        elif isinstance(self.igra, Pop10_logika):
+            # Imamo Pop 10 igro
+            if self.igra.faza == 1:
+                # Smo v fazi odstranjevanja žetonov
+                zeljen_vrstni_red = random.sample([18, 68, 25, 75], 4) # Središčni dve polji
+                dodajamo = [10, 11, 12, 17, 19, 24, 26, 31, 32, 33]
+                dodajamo += [50+i for i in dodajamo]
+                zeljen_vrstni_red += random.sample(dodajamo, len(dodajamo))
+                dodajamo = [i for i in range(2, 7)] + [i for i in range(37, 42)] + [9+7*i for i in range(4)] + [13+7*i for i in range(4)]
+                dodajamo += [50+i for i in dodajamo]
+                zeljen_vrstni_red += random.sample(dodajamo, len(dodajamo))
+                dodajamo = [1+7*i for i in range(6)] + [7+7*i for i in range(6)]
+                dodajamo += [50+i for i in dodajamo]
+                zeljen_vrstni_red += random.sample(dodajamo, len(dodajamo))                
+            else:
+                # Smo v fazi dodajanja žetonov (lahko 0 ali 2)
+                zeljen_vrstni_red = [4]
+                for i in range(1,4):
+                    zeljen_vrstni_red += random.sample([4+i, 4-i], 2)
         else:
             # Imamo 4 v vrsto ali Pop Out
             zeljen_vrstni_red = [4,-4] # Željen vrstni red, če so na voljo vse poteze
@@ -247,13 +267,11 @@ class AlphaBeta:
                 if maksimiziramo:
                     # Maksimiziramo
                     najboljsa_poteza = None
-                    poteze = self.uredi_poteze(self.igra.veljavne_poteze())
-                    for p in poteze:
+                    for p in self.uredi_poteze(self.igra.veljavne_poteze()):
                         self.igra.povleci_potezo(p)
-                        if p > 70:
+                        if (p > 70 and isinstance(self.igra, Powerup_logika)) or (isinstance(self.igra, Pop10_logika) and self.igra.faza == 2):
                             # Imamo dvojno potezo
-                            poteze2 = self.uredi_poteze(self.igra.veljavne_poteze())
-                            for p2 in poteze2:
+                            for p2 in self.uredi_poteze(self.igra.veljavne_poteze()):
                                 self.igra.povleci_potezo(p)
                                 vrednost = self.alphabeta(max(globina-2, 0), alpha, beta, not maksimiziramo)[1]
                                 self.igra.razveljavi()
@@ -280,13 +298,11 @@ class AlphaBeta:
                 else:
                     # Minimiziramo
                     najboljsa_poteza = None
-                    poteze = self.uredi_poteze(self.igra.veljavne_poteze())
-                    for p in poteze:
+                    for p in self.uredi_poteze(self.igra.veljavne_poteze()):
                         self.igra.povleci_potezo(p)
-                        if p > 70:
+                        if (p > 70 and isinstance(self.igra, Powerup_logika)) or (isinstance(self.igra, Pop10_logika) and self.igra.faza == 2):
                             # Imamo dvojno potezo
-                            poteze2 = self.uredi_poteze(self.igra.veljavne_poteze())
-                            for p2 in poteze2:
+                            for p2 in self.uredi_poteze(self.igra.veljavne_poteze()):
                                 self.igra.povleci_potezo(p)
                                 vrednost = self.alphabeta(max(globina-2, 0), alpha, beta, not maksimiziramo)[1]
                                 self.igra.razveljavi()
@@ -310,7 +326,7 @@ class AlphaBeta:
                                 najboljsa_poteza = p
                             if beta <= alpha:
                                 break
-                assert (najboljsa_poteza is not None), 'alphabeta: izračunana poteza je None, veljavne_poteze={0}'.format(self.igra.veljavne_poteze())
+                assert (najboljsa_poteza is not None), 'alphabeta: izračunana poteza je None, veljavne_poteze={0}, globina={1}'.format(self.igra.veljavne_poteze(), globina)
                 return (najboljsa_poteza, alpha if maksimiziramo else beta)
         else:
             assert False, 'alphabeta: nedefinirano stanje igre'

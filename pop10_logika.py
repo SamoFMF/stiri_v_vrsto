@@ -35,7 +35,10 @@ class Pop10_logika(Igra):
             Veljavna igra -> vrne stanje_igre() po potezi, sicer None.'''
         poteze = self.veljavne_poteze()
         osvezi = False # Če moramo osvežiti grafični prikaz igralne površine
-        dvojna = False # Ostane isti igralec na potezi?
+
+        # Preverimo najprej, če smo v fazi 1 in je poteza p+50 namesto p
+        if self.faza == 1 and not p in poteze and p+50 in poteze:
+            p += 50
 
         # Preverimo, če je poteza veljavna
         if p in poteze:
@@ -53,34 +56,30 @@ class Pop10_logika(Igra):
                     self.faza = 1
             elif self.faza == 1:
                 # Smo v fazi 1 (odstranjevanje žetonov)
-                if p == 21:
-                    # Nimamo "veljavnih" potez, ne naredi ničesar
-                    pass
-                else:
-                    # Imamo veljavno potezo
-                    j = 0
-                    del self.polozaj[p%10-1][j]
-                    self.polozaj[p%10-1].append(j)
-                    osvezi = True
-                    if p > 10:
-                        dvojna = True
-                        self.faza = 3
-                    elif self.na_potezi == IGRALEC_R:
-                        self.odstranjeni[0] += 1
-                    elif self.na_potezi == IGRALEC_Y:
-                        self.odstranjeni[1] += 1
+                i = (p % 50 - 1) % 7
+                j = (p % 50 - 1) // 7
+                del self.polozaj[i][j]
+                self.polozaj[i].append(0)
+                osvezi = True
+                if p > 50:
+                    # Žeton ni bil v štirki, ponovno smo na potezi
+                    self.faza = 2
+                elif self.na_potezi == IGRALEC_R:
+                    self.odstranjeni[0] += 1
+                elif self.na_potezi == IGRALEC_Y:
+                    self.odstranjeni[1] += 1
             else:
-                # Smo v fazi 3 (dodajanje odstranjenih žetonov)
+                # Smo v fazi 2 (dodajanje odstranjenih žetonov)
                 j = self.vrstica(p-1)
                 self.polozaj[p-1][j] = self.na_potezi
-                self.faza = 2
+                self.faza = 1
         else:
             # Poteza ni veljavna
             return None
         (zmagovalec, stirka) = self.stanje_igre()
         if zmagovalec == NI_KONEC:
             # Igra se nadaljuje
-            if dvojna:
+            if self.faza == 2:
                 # Na potezi je ponovno isti igralec
                 pass
             else:
@@ -90,8 +89,27 @@ class Pop10_logika(Igra):
             # Igra se je zaključila
             self.na_potezi = None
         self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
-        return (zmagovalec, stirka, None if (self.faza == 1 and p == 21) else (p%10-1,j), osvezi)
+        return (zmagovalec, stirka, (p-1,j), osvezi) # (p-1,j) nas ne zanima, ko je osvezi == 1, torej pri edinem primeru, kjer to ni pravi zapis (self.faza = 1)
 
+    def razveljavi(self, i=1):
+        '''Razveljavi potezo in se vrne v prejšnje stanje.'''
+        if self.stevec > i-1:
+            self.stevec -= i
+            (self.polozaj, self.na_potezi, self.faza, self.odstranjeni) = self.zgodovina[self.stevec]
+            self.stevilo_potez -= i
+            return (self.polozaj, self.na_potezi)
+        else:
+            return None
+
+    def shrani_polozaj(self):
+        '''Shrani trenutni položaj igre, da se lahko vanj vrnemo
+            s klicem metode 'razveljavi'.'''
+        p = [self.polozaj[i][:] for i in range(7)] # Položaj
+        ods = [i for i in self.odstranjeni] # Število odstranjenih žetonov
+        self.zgodovina.append((p, self.na_potezi, self.faza, ods))
+        self.stevec += 1
+        self.stevilo_potez += 1
+    
     def stanje_igre(self):
         '''Vrne nam trenutno stanje igre. Možnosti so:
             - (IGRALEC_R, stirka), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
@@ -103,12 +121,27 @@ class Pop10_logika(Igra):
         # TODO
         if self.odstranjeni[0] == 10:
             # Zmagal je rdeči
-            return (IGRALEC_R, [(0,0),(1,0),(2,0),(3,0)])
+            return (IGRALEC_R, None)
         elif self.odstranjeni[1] == 10:
             # Zmagal je rumeni
-            return (IGRALEC_Y, [(0,0),(1,0),(2,0),(3,0)])
+            return (IGRALEC_Y, None)
         else:
             return (NI_KONEC, None)
+
+    def uveljavi(self, i=1):
+        '''Uveljavi zadnjo razveljavljeno potezo in se vrne v njeno stanje.'''
+        if self.stevec < len(self.zgodovina)-i:
+            self.stevec += i
+            (self.polozaj, self.na_potezi, self.faza, self.odstranjeni) = self.zgodovina[self.stevec]
+            self.stevilo_potez += i
+            return (self.polozaj, self.na_potezi)
+        elif self.stevec == len(self.zgodovina)-i:
+            self.stevec += 1
+            (self.polozaj, self.na_potezi, self.faza, self.odstranjeni) = self.zadnja
+            self.stevilo_potez += i
+            return (self.polozaj, self.na_potez)
+        else:
+            return None
 
     def veljavne_poteze(self):
         if self.faza == 0:
@@ -136,20 +169,18 @@ class Pop10_logika(Igra):
 
             poteze = []
             for (i,a) in enumerate(self.polozaj):
-                if a[0] == self.na_potezi:
-                    # Če je žeton v spodnji vrstici naš, ga lahko izvlečemo
-                    if self.znotraj_stirke(i):
-                        # Smo znotraj štirke
-                        # Te poteze samo odstranijo žeton
-                        poteze.append(i+1)
-                    else:
-                        # Nismo v nobeni štirki
-                        # Te poteze nas postavijo v fazo 3
-                        poteze.append(i+11)
-            if len(poteze) == 0:
-                # Če ni v spodnji vrstici nobenega našega žetona,
-                # dodamo 'kvazi' potezo, ki bo samo spremenili igralca na potezi
-                poteze.append(21)
+                for (j,b) in enumerate(a):
+                    if b == self.na_potezi:
+                        # Na položaju je naš žeton, lahko ga odstranimo
+                        if self.znotraj_stirke(i,j):
+                            # Žeton je znotraj štirke
+                            # Poteze so označene z 1-42
+                            poteze.append(i+1+7*j)
+                        else:
+                            # Žeton ni znotraj nobene štirke
+                            # Ta poteza nas postavi v fazo 2
+                            # Poteze so označene z 51-92
+                            poteze.append(i+51+7*j)
             return poteze
         else:
             # Smo v fazi dodajanja žetona na vrh
@@ -160,13 +191,12 @@ class Pop10_logika(Igra):
                     poteze.append(i+1)
             return poteze
 
-    def znotraj_stirke(self, p):
-        '''Pove, če je poteza znotraj kake štirke.'''
-        # Funkcija bo vrnila True, če je poteza p znotraj
+    def znotraj_stirke(self, x, y):
+        '''Pove, če je žeton na (x,y) položaju v kakšni štirki.'''
+        # Funkcija bo vrnila True, če je žeton (x,y) znotraj
         # kake štirke in False sicer
-        i = p-1
         for s in Igra.stirke:
-            if (i,0) in s:
+            if (x,y) in s:
                 ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                 stirka = [self.polozaj[i1][j1], self.polozaj[i2][j2],
                           self.polozaj[i3][j3], self.polozaj[i4][j4]]
