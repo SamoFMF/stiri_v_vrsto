@@ -79,3 +79,5 @@ V `stiri_v_vrsto.py` je koda za uporabniški vmesnik.
 V datotekah `logika.py`, `pop_logika.py`, `five_logika.py`, `powerup_logika.py` ter `pop10_logika.py` se nahajajo logike iger.
 Možnosti človeka so v `clovek.py`, medtem ko je računalnik ustvarjen v `racunalnik.py`. Za odločanje o svojih potezah uporablja algoritma, ki sta zapisana v `rand_algoritem.py` ter `alphabeta.py`.
 
+## Spreminjanje dimenzij
+Spreminjanje najmanjše velikosti okna (t.j. znotraj funkcije `minsize`) in izpeljanih konstant (to sta `VISINA_PLATNO_MENU` in `SIRINA_PLATNO_MENU`) odsvetujem. Če že morate spreminjati dimenzije, dajte to preko spremenljivk `MIN_SIRINA` in `MIN_VISINA`. Pri tem obe vrednosti pomnožite z istim faktorjem, tako da se bodo vsa razmerja ohranila. Pravtako odsvetujem, da je ta faktor manjši od 1 (torej da krčite meni). Pri tem pa morate upoštevati, da so slike za "power up" poteze prilagojene na trenutno nastavljene dimenzije ter da Tkinter ni najbolj domač s spreminjanjem njihovih dimenzij. Zato je najboljše, če slikam spremenite velikost v drugih programih in jih nato zamenjate. Formulo za približne dimenzije slik lahko najdete v komentarjih v `stiri_v_vrsto.py`.
