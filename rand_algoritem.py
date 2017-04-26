@@ -1,4 +1,3 @@
-from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, NEVELJAVNO, nasprotnik
 import random
 
 ######################
@@ -28,12 +27,15 @@ class Rand_alg():
 
         # Poženemo metodo za iskanje poteze
         poteza = self.rand_algoritem()
+        print('igralec = {0}, poteza = {1}'.format(self.jaz, poteza))
         self.jaz = None
         self.igra = None
+        
         if not self.prekinitev:
             # Če nismo bili prekinjeni, izvedemo potezo
             self.poteza = poteza
 
     def rand_algoritem(self):
+        '''Vrne naključno potezo izmed vseh veljavnih.'''
         poteze = self.igra.veljavne_poteze()
         return random.choice(poteze)

@@ -20,7 +20,7 @@ class Powerup_logika(Logika):
         # Vrednost False bo zaseglo, če bo uporabljen 2x non-winning power up
         self.sme_zmagati = True
 
-        # Shranimo stanje, ki nam pove, če bo igralec ponovno na potezo
+        # Shranimo stanje, ki nam pove, če bo igralec ponovno na potezi
         # V tem stanju lahko igra le 'normalno' potezo
         self.dvojna_poteza = False
 
@@ -50,14 +50,21 @@ class Powerup_logika(Logika):
         k.dvojna_poteza = self.dvojna_poteza
         return k
 
-    def povleci_potezo(self, p):
+    def povleci_potezo(self, p, racunalnik=False):
         '''Povleci potezo p, če je veljavna, sicer ne naredi nič.
             Veljavna igra -> vrne stanje_igre() po potezi, sicer None.'''
-        poteze = self.veljavne_poteze()
+        assert (p is not None), 'Nekako smo prišli do tega, da je p = {0}'.format(p)
+        if racunalnik:
+            # Računalnik izbira samo med veljavnimi potezami
+            # S tem si prihranimo ponovno računanje veljavnih potez
+            pass
+        else:
+            # Potezo vleče človek
+            poteze = self.veljavne_poteze()
         osvezi = False # Če moramo osvežiti igralno površino, ker smo izbrisali kakšne žetone
 
         # Preverimo, če je poteza veljavna
-        if p in poteze:
+        if racunalnik or p in poteze:
             # Poteza je veljavna
             kateri_igr = 0 if self.na_potezi == IGRALEC_R else 1 # Potrebujemo za knjiženje 'power up'-ov
             
@@ -76,7 +83,7 @@ class Powerup_logika(Logika):
             elif p < 21:
                 # Imamo potezo, ki potepta stolpec
                 stolpec = p - 11
-                self.polozaj[stolpec] = [self.na_potezi, 0, 0, 0, 0, 0]
+                self.polozaj[stolpec] = [self.na_potezi, PRAZNO, PRAZNO, PRAZNO, PRAZNO, PRAZNO]
                 self.powerups[kateri_igr][0] -= 1
                 osvezi = True
             elif p < 71:
@@ -84,7 +91,7 @@ class Powerup_logika(Logika):
                 stolpec = (p - 21) % 7
                 vrstica = (p - 21) // 7
                 del self.polozaj[stolpec][vrstica]
-                self.polozaj[stolpec].append(0)
+                self.polozaj[stolpec].append(PRAZNO)
                 self.powerups[kateri_igr][1] -= 1
                 osvezi = True
             elif p < 81:
@@ -116,7 +123,7 @@ class Powerup_logika(Logika):
             # Igra se je zaključila
             self.na_potezi = None
         self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi, self.powerups, self.sme_zmagati, self.dvojna_poteza)
-        return (zmagovalec, stirka, (p%10-1,j) if (p<11 or p>70) else 0, osvezi)
+        return (zmagovalec, stirka, (p%10-1,j) if (p<11 or p>70) else (0,0), osvezi) # Ko je (0,0), je osvezi = 1, torej ni pomembno katera poteza je
 
     def razveljavi(self, i=1):
         '''Razveljavi potezo in se vrne v prejšnje stanje.'''
@@ -141,7 +148,7 @@ class Powerup_logika(Logika):
 
     def uveljavi(self, i=1):
         '''Uveljavi zadnjo razveljavljeno potezo in se vrne v njeno stanje.'''
-        if self.stevec < len(self.zgodovina)-i: # -i začasno, dokler ne dodam zadnje poteze
+        if self.stevec < len(self.zgodovina)-i:
             self.stevec += i
             (self.polozaj, self.na_potezi, self.powerups,
              self.sme_zmagati, self.dvojna_poteza) = self.zgodovina[self.stevec]
@@ -163,7 +170,7 @@ class Powerup_logika(Logika):
         kateri_igr = 0 if self.na_potezi == IGRALEC_R else 1
         # Najprej dodajmo 'normalne' poteze
         for (i,a) in enumerate(self.polozaj):
-            if a[-1] == 0:
+            if a[-1] == PRAZNO:
                 if self.sme_zmagati:
                     poteze.append(i+1)
                 else:
@@ -182,9 +189,9 @@ class Powerup_logika(Logika):
 
         # Dodajmo poteze, kjer poteptamo stolpec
         # Označimo jih z 11-17
-        if self.powerups[kateri_igr][0] == 1:
+        if self.powerups[kateri_igr][0] > 0:
             for (i,a) in enumerate(self.polozaj):
-                if a[0] == 0:
+                if a[0] == PRAZNO:
                     # Stolpec je prazen
                     # To je kar navadna poteza, nočemo se ponavljati ali porabiti 'power up-a'
                     continue
@@ -193,7 +200,7 @@ class Powerup_logika(Logika):
                 
         # Dodajmo poteze, kjer odstranimo nasprotnikov žeton
         # Označimo jih z 21-62
-        if self.powerups[kateri_igr][1] == 1:
+        if self.powerups[kateri_igr][1] > 0:
             for (i,a) in enumerate(self.polozaj):
                 for (j,barva) in enumerate(a):
                     if barva == nasprotnik(self.na_potezi):
@@ -201,9 +208,9 @@ class Powerup_logika(Logika):
 
         # Dodajmo poteze, kjer bo naslednja poteza zaporedna brez možnosti zmage
         # Označimo jih z 71-77
-        if self.powerups[kateri_igr][2] == 1:
+        if self.powerups[kateri_igr][2] > 0:
             for (i,a) in enumerate(self.polozaj):
-                if a[-1] == 0:
+                if a[-1] == PRAZNO:
                     zmagovalec = self.ima_zmagovalca(i+1)
                     if zmagovalec is None:
                         # Preverimo, da poteza ni zmagovalna, če je,
@@ -212,9 +219,9 @@ class Powerup_logika(Logika):
 
         # Dodajmo poteze, kjer bo naslednja poteza zaporedna z možnostjo zmage
         # Označimo jih z 81-88
-        if self.powerups[kateri_igr][3] == 1:
+        if self.powerups[kateri_igr][3] > 0:
             for (i,a) in enumerate(self.polozaj):
-                if a[-1] == 0:
+                if a[-1] == PRAZNO:
                     zmagovalec = self.ima_zmagovalca(i+1)
                     if zmagovalec is None:
                         # Preverimo, da poteza ni zmagovalna, če je,

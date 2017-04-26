@@ -14,6 +14,62 @@ class Pop_logika(Logika):
         k.stevilo_potez = self.stevilo_potez
         return k
 
+    def povleci_potezo(self, p, racunalnik=False):
+        '''Povleci potezo p, če je veljavna, sicer ne naredi nič.
+            Veljavna igra -> vrne stanje_igre() po potezi, sicer None.'''
+        if racunalnik:
+            # Računalnik izbira samo med veljavnimi potezami
+            # S tem si prihranimo ponovno računanje veljavnih potez
+            pass
+        else:
+            # Potezo vleče človek
+            poteze = self.veljavne_poteze()
+        
+        je_popout = False # Če bo poteza popout, bomo morali osvežiti grafični prikaz igralne površine
+
+        # Preverimo, če je poteza veljavna
+        if p < 0:
+            k = -(p+1) # Kateri stolpec to dejansko je
+            if racunalnik or p in poteze:
+                # Imamo popout potezo
+                if len(self.zgodovina) > self.stevec:
+                    self.zgodovina = self.zgodovina[:self.stevec]
+                self.shrani_polozaj()
+                # Odstranimo spodnji žeton
+                del self.polozaj[k][0]
+                self.polozaj[k].append(PRAZNO)
+                j = 0
+                je_popout = True
+            elif -p in poteze:
+                if len(self.zgodovina) > self.stevec:
+                    self.zgodovina = self.zgodovina[:self.stevec]
+                self.shrani_polozaj()
+                j = self.vrstica(k)
+                self.polozaj[k][j] = self.na_potezi
+            else:
+                # Poteza ni veljavna
+                return None
+        elif racunalnik or p in poteze:
+            # Poteza je veljavna
+            if len(self.zgodovina) > self.stevec:
+                self.zgodovina = self.zgodovina[:self.stevec]
+            self.shrani_polozaj()
+            j = self.vrstica(p-1)
+            self.polozaj[p-1][j] = self.na_potezi
+        else:
+            # Poteza ni veljavna
+            return None
+        
+        (zmagovalec, stirka) = self.stanje_igre()
+        if zmagovalec == NI_KONEC:
+            # Igra se nadaljuje, na potezi je nasprotnik
+            self.na_potezi = nasprotnik(self.na_potezi)
+        else:
+            # Igra se je zaključila
+            self.na_potezi = None
+        self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
+        return (zmagovalec, stirka, (k,j) if p<0 else (p-1,j), je_popout)
+
     def stanje_igre(self):
         '''Vrne nam trenutno stanje igre. Možnosti so:
             - (IGRALEC_R, stirka), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
@@ -54,7 +110,7 @@ class Pop_logika(Logika):
         poteze = []
         barva = self.na_potezi
         for (i,a) in enumerate(self.polozaj):
-            if a[-1] == 0:
+            if a[-1] == PRAZNO:
                 # V stolpcu je še vsaj 1 prosto mesto
                 poteze.append(i+1)
             if barva and a[0] == barva:

@@ -30,18 +30,23 @@ class Pop10_logika(Logika):
         k.odstranjeni = [i for i in self.odstranjeni]
         return k
 
-    def povleci_potezo(self, p):
+    def povleci_potezo(self, p, racunalnik=False):
         '''Povleci potezo p, če je veljavna, sicer ne naredi nič.
             Veljavna igra -> vrne stanje_igre() po potezi, sicer None.'''
-        poteze = self.veljavne_poteze()
+        if racunalnik:
+            # Računalnik izbira samo med veljavnimi potezami
+            # S tem si prihranimo ponovno računanje veljavnih potez
+            pass
+        else:
+            # Potezo vleče človek
+            poteze = self.veljavne_poteze()
+            # Preverimo najprej, če smo v fazi 1 in je poteza p+50 namesto p
+            if self.faza == 1 and not p in poteze and p+50 in poteze:
+                p += 50
         osvezi = False # Če moramo osvežiti grafični prikaz igralne površine
 
-        # Preverimo najprej, če smo v fazi 1 in je poteza p+50 namesto p
-        if self.faza == 1 and not p in poteze and p+50 in poteze:
-            p += 50
-
         # Preverimo, če je poteza veljavna
-        if p in poteze:
+        if racunalnik or p in poteze:
             # Poteza je veljavna
             if len(self.zgodovina) > self.stevec:
                 self.zgodovina = self.zgodovina[:self.stevec]
@@ -59,7 +64,7 @@ class Pop10_logika(Logika):
                 i = (p % 50 - 1) % 7
                 j = (p % 50 - 1) // 7
                 del self.polozaj[i][j]
-                self.polozaj[i].append(0)
+                self.polozaj[i].append(PRAZNO)
                 osvezi = True
                 if p > 50:
                     # Žeton ni bil v štirki, ponovno smo na potezi
@@ -148,7 +153,7 @@ class Pop10_logika(Logika):
             vrstica = None
             for v in range(6):
                 for (s,a) in enumerate(self.polozaj):
-                    if a[v] == 0:
+                    if a[v] == PRAZNO:
                         vrstica = v
                         break
                 if vrstica is not None:
@@ -158,7 +163,7 @@ class Pop10_logika(Logika):
             # Dodajmo sedaj proste poteze
             poteze = []
             for i in range(7):
-                if self.polozaj[i][vrstica] == 0:
+                if self.polozaj[i][vrstica] == PRAZNO:
                     poteze.append(i+1)
             return poteze
         elif self.faza == 1:
@@ -184,7 +189,7 @@ class Pop10_logika(Logika):
             
             poteze = []
             for (i,a) in enumerate(self.polozaj):
-                if a[-1] == 0:
+                if a[-1] == PRAZNO:
                     poteze.append(i+1)
             return poteze
 

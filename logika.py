@@ -9,7 +9,6 @@ IGRALEC_Y = 2 # Igralec, ki ima rumene krogce
 PRAZNO = 0 # Prazno polje
 NEODLOCENO = "neodločeno" # Igra se je končala z neodločenim izzidom
 NI_KONEC = "ni konec" # Igre še ni konec
-NEVELJAVNO = 99 # Ta stolpec ni veljaven
 
 def nasprotnik(igralec):
     """Vrni nasprotnika od igralca."""
@@ -79,35 +78,19 @@ class Logika():
         k.stevilo_potez = self.stevilo_potez
         return k
 
-    def povleci_potezo(self, p):
+    def povleci_potezo(self, p, racunalnik=False):
         '''Povleci potezo p, če je veljavna, sicer ne naredi nič.
             Veljavna igra -> vrne stanje_igre() po potezi, sicer None.'''
-        poteze = self.veljavne_poteze()
-        je_popout = False
+        if racunalnik:
+            # Računalnik izbira samo med veljavnimi potezami
+            # S tem si prihranimo ponovno računanje veljavnih potez
+            pass
+        else:
+            # Potezo vleče človek
+            poteze = self.veljavne_poteze()
 
         # Preverimo, če je poteza veljavna
-        if p < 0:
-            k = -(p+1) # Kateri stolpec to dejansko je
-            if p in poteze:
-                # Imamo popout potezo
-                if len(self.zgodovina) > self.stevec:
-                    self.zgodovina = self.zgodovina[:self.stevec]
-                self.shrani_polozaj()
-                # Odstranimo spodnji žeton
-                del self.polozaj[k][0]
-                self.polozaj[k].append(0)
-                j = 0
-                je_popout = True
-            elif -p in poteze:
-                if len(self.zgodovina) > self.stevec:
-                    self.zgodovina = self.zgodovina[:self.stevec]
-                self.shrani_polozaj()
-                j = self.vrstica(k)
-                self.polozaj[k][j] = self.na_potezi
-            else:
-                # Poteza ni veljavna
-                return None
-        elif p in poteze:
+        if racunalnik or p in poteze:
             # Poteza je veljavna
             if len(self.zgodovina) > self.stevec:
                 self.zgodovina = self.zgodovina[:self.stevec]
@@ -117,6 +100,7 @@ class Logika():
         else:
             # Poteza ni veljavna
             return None
+        
         (zmagovalec, stirka) = self.stanje_igre()
         if zmagovalec == NI_KONEC:
             # Igra se nadaljuje, na potezi je nasprotnik
@@ -125,7 +109,7 @@ class Logika():
             # Igra se je zaključila
             self.na_potezi = None
         self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
-        return (zmagovalec, stirka, (k,j) if p<0 else (p-1,j), je_popout)
+        return (zmagovalec, stirka, (p-1,j), False)
 
     def razveljavi(self, i=1):
         '''Razveljavi potezo in se vrne v prejšnje stanje.'''
@@ -187,13 +171,13 @@ class Logika():
         '''Vrne seznam veljavnih potez.'''
         poteze = []
         for (i,a) in enumerate(self.polozaj):
-            if a[-1] == 0:
+            if a[-1] == PRAZNO:
                 poteze.append(i+1)
         return poteze
     
     def vrstica(self, i):
         for (j,b) in enumerate(self.polozaj[i]):
-            if b == 0:
+            if b == PRAZNO:
                 # Kličemo samo v primeru, ko imamo veljavno potezo,
                 # torej bo vedno obstajal tak b
                 return j

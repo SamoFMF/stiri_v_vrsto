@@ -1,4 +1,4 @@
-from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik, NEVELJAVNO
+from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik
 from five_logika import Five_logika
 from powerup_logika import Powerup_logika
 from pop10_logika import Pop10_logika
@@ -260,8 +260,6 @@ class AlphaBeta:
 
         (zmagovalec, stirka) = self.igra.stanje_igre()
         if zmagovalec in (IGRALEC_R, IGRALEC_Y, NEODLOCENO):
-            # Tukaj opazimo, da pri Pop Out lahko pride do tega, da je k < 0
-            # Premisli, kaj storiti
             if isinstance(self.igra, Pop10_logika):
                 if zmagovalec == self.jaz:
                     k = 0.984**(max(self.igra.stevilo_potez - 42, 0))
@@ -292,11 +290,11 @@ class AlphaBeta:
                     # Maksimiziramo
                     najboljsa_poteza = None
                     for p in self.uredi_poteze(self.igra.veljavne_poteze()):
-                        self.igra.povleci_potezo(p)
+                        self.igra.povleci_potezo(p, True)
                         if (p > 70 and isinstance(self.igra, Powerup_logika)) or (isinstance(self.igra, Pop10_logika) and self.igra.faza == 2):
                             # Imamo dvojno potezo
                             for p2 in self.uredi_poteze(self.igra.veljavne_poteze()):
-                                self.igra.povleci_potezo(p)
+                                self.igra.povleci_potezo(p2, True)
                                 vrednost = self.alphabeta(max(globina-2, 0), alpha, beta, not maksimiziramo)[1]
                                 self.igra.razveljavi()
                                 if vrednost > alpha:
@@ -323,11 +321,11 @@ class AlphaBeta:
                     # Minimiziramo
                     najboljsa_poteza = None
                     for p in self.uredi_poteze(self.igra.veljavne_poteze()):
-                        self.igra.povleci_potezo(p)
+                        self.igra.povleci_potezo(p, True)
                         if (p > 70 and isinstance(self.igra, Powerup_logika)) or (isinstance(self.igra, Pop10_logika) and self.igra.faza == 2):
                             # Imamo dvojno potezo
                             for p2 in self.uredi_poteze(self.igra.veljavne_poteze()):
-                                self.igra.povleci_potezo(p)
+                                self.igra.povleci_potezo(p2, True)
                                 vrednost = self.alphabeta(max(globina-2, 0), alpha, beta, not maksimiziramo)[1]
                                 self.igra.razveljavi()
                                 if vrednost < beta:
