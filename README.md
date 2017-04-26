@@ -76,6 +76,6 @@ Računalnik ima pet različnih težavnosti, pri čemer `naključen` deluje po sv
 
 ## Kratka razlaga datotek / kode
 V `stiri_v_vrsto.py` je koda za uporabniški vmesnik.
-V datotekah `logika.py`, `pop_logika.py`, `five_logika.py` ter `powerup_logika.py` se nahajajo logike iger.
+V datotekah `logika.py`, `pop_logika.py`, `five_logika.py`, `powerup_logika.py` ter `pop10_logika.py` se nahajajo logike iger.
 Možnosti človeka so v `clovek.py`, medtem ko je računalnik ustvarjen v `racunalnik.py`. Za odločanje o svojih potezah uporablja algoritma, ki sta zapisana v `rand_algoritem.py` ter `alphabeta.py`. Imamo še datoteko `minimax.py`, kjer je sedaj že zastareli algoritem.
 
