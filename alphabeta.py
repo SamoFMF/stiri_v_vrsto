@@ -1,5 +1,3 @@
-import logging
-
 from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik, NEVELJAVNO
 from five_logika import Five_logika
 from powerup_logika import Powerup_logika
@@ -48,12 +46,11 @@ class AlphaBeta:
         urejene_poteze = [] # Urejen seznam potez
         if isinstance(self.igra, Five_logika):
             # Imamo 5 v vrsto
-            # TODO - odstrani negativne vrednosti, niso možne
-            zeljen_vrstni_red = [1,-1,4,-4,7,-7] # Željen vrstni red, če so na voljo vse poteze
-            zeljen_vrstni_red = random.sample(zeljen_vrstni_red, 6)
+            zeljen_vrstni_red = [1,4,7] # Željen vrstni red, če so na voljo vse poteze
+            zeljen_vrstni_red = random.sample(zeljen_vrstni_red, 3)
             for i in range(1,3):
-                dodajamo = [4-i,-4+i,4+i,-4-i] # Poteze, ki jih želimo dodati
-                dodajamo = random.sample(dodajamo, 4)
+                dodajamo = [4-i,4+i] # Poteze, ki jih želimo dodati
+                dodajamo = random.sample(dodajamo, 2)
                 for j in dodajamo:
                     zeljen_vrstni_red.append(j)
         elif isinstance(self.igra, Powerup_logika):
@@ -191,6 +188,7 @@ class AlphaBeta:
                         # V petki so rumeni in rdeči žetoni
                         continue
             elif isinstance(self.igra, Pop10_logika):
+                # TODO - Ocena še ni dobra, včasih čaka preden zmaga itd.
                 # Naš cilj tukaj je, da bi imeli čim več štirk
                 tocke = [0, 0]
                 vrednost_stirke = AlphaBeta.ZMAGA / 30 # Da ne bomo nikoli imeli > ZMAGA brez da smo zmagali. Zo je vbistvu vrednost zmagovalne štirke.

@@ -1,10 +1,10 @@
+from logika import *
+
 ###################
 ## LOGIKA POPOUT ##
 ###################
 
-from logika import *
-
-class Pop_logika(Igra):
+class Pop_logika(Logika):
 
     def kopija(self):
         '''Vrne kopijo te igre, brez zgodovine.'''
@@ -23,7 +23,7 @@ class Pop_logika(Igra):
         # Najprej preverimo, če obstaja kakšna zmagovalna štirka
         zmagovalci = []
         stirke = []
-        for s in Igra.stirke:
+        for s in Logika.stirke:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
             barva = self.polozaj[i1][j1]
             if (barva != PRAZNO) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):

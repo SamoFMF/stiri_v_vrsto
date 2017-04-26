@@ -1,13 +1,13 @@
-#################
-## LOGIKA IGRE ##
-#################
-
 from logika import *
 
-class Pop10_logika(Igra):
+####################
+## LOGIKA POP TEN ##
+####################
+
+class Pop10_logika(Logika):
 
     def __init__(self):
-        # Prekopiramo __init__ iz objekta Igra
+        # Prekopiramo __init__ iz objekta Logika
         super(Pop10_logika, self).__init__()
 
         # V spremenljivko 'faza' bomo shranili fazo igre, ki je lahko:
@@ -112,13 +112,10 @@ class Pop10_logika(Igra):
     
     def stanje_igre(self):
         '''Vrne nam trenutno stanje igre. Možnosti so:
-            - (IGRALEC_R, stirka), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
-            - (IGRALEC_Y, stirka), če je igre konec in je zmagal IGRALEC_Y z dano zmagovalno štirko,
+            - (IGRALEC_R, None), če je igre konec in je zmagal IGRALEC_R,
+            - (IGRALEC_Y, None), če je igre konec in je zmagal IGRALEC_Y,
             - (NEODLOCENO, None), če je igre konec in je neodločeno,
             - (NI_KONEC, None), če je igra še vedno v teku.'''
-        # Zaenkrat podajmo neko poljubno štirko ob koncu
-        # Premisli, kako integrirati to v Gui brez štirke
-        # TODO
         if self.odstranjeni[0] == 10:
             # Zmagal je rdeči
             return (IGRALEC_R, None)
@@ -195,7 +192,7 @@ class Pop10_logika(Igra):
         '''Pove, če je žeton na (x,y) položaju v kakšni štirki.'''
         # Funkcija bo vrnila True, če je žeton (x,y) znotraj
         # kake štirke in False sicer
-        for s in Igra.stirke:
+        for s in Logika.stirke:
             if (x,y) in s:
                 ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                 stirka = [self.polozaj[i1][j1], self.polozaj[i2][j2],

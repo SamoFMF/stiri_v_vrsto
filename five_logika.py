@@ -1,10 +1,10 @@
+from logika import *
+
 ########################
 ## LOGIKA PET-V-VRSTO ##
 ########################
 
-from logika import *
-
-class Five_logika(Igra):
+class Five_logika(Logika):
     # Tabela vseh možnih zmagovalnih kombinacij 4 v vrsto
     stirke_R = [
         [(0,1), (1,2), (2,3), (3,4)],

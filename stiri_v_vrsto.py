@@ -1,22 +1,23 @@
 import tkinter # Uvozimo tkinter za uporabniški vmesnik
 from math import sqrt
+import random
 
 from logika import *
-from pop_logika import *
-from five_logika import *
-from powerup_logika import *
-from pop10_logika import *
+from pop_logika import Pop_logika
+from five_logika import Five_logika
+from powerup_logika import Powerup_logika
+from pop10_logika import Pop10_logika
 from clovek import *
 from racunalnik import *
-from rand_algoritem import *
-from minimax import *
-from alphabeta import *
+from rand_algoritem import Rand_alg
+from alphabeta import AlphaBeta
 
 #########################
 ## UPORABNIŠKI VMESNIK ##
 #########################
 
 # Najboljše, če se ne spreminja preveč, ker izgleda najlepše pri teh številkah
+# Če že spreminjaš, povečaj, ne zmanjšaj
 MIN_SIRINA = 500
 MIN_VISINA = 555
 ZVP = 100 # Zacetna velikost polja
@@ -38,17 +39,20 @@ class Gui():
     # Velikost okvirja za stranski menu
     OKVIR = 5
 
+    # Background barva za platno_menu
+    BG_BARVA = 'black'
+
     # Visina in sirina platna z rezultatom itd.
     # ODSVETUJEM SPREMINJANJE
     VISINA_PLATNO_MENU = 0.55 * MIN_VISINA
-    SIRINA_PLATNO_MENU = 0.8 * MIN_SIRINA - 3*OKVIR
+    SIRINA_PLATNO_MENU = 0.8 * MIN_SIRINA - 3 * OKVIR
 
     def __init__(self, master):
         self.igralec_r = None # Objekt, ki igra rdeče krogce
         self.igralec_y = None # Objekt, ki igra rumene krogce
         self.igra = None # Objekt, ki predstavlja igro
-        self.VELIKOST_POLJA = ZVP # Velikost polja
-        self.VELIKOST_GAP = self.VELIKOST_POLJA / 20 # Razdalja med okvirjem in figuro
+        self.velikost_polja = ZVP # Velikost polja
+        self.velikost_gap = self.velikost_polja / 20 # Razdalja med okvirjem in figuro
         self.rezultat = [0, 0] # Trenutni rezultat
 
         self.tip_rdeci = tkinter.IntVar() # Kakšen je rdeči, 0='človek',1='rac-rand',2='rac-easy',3='rac-med',4='rac-hard'
@@ -66,11 +70,10 @@ class Gui():
                                2: lambda: Racunalnik(self, AlphaBeta(2)),
                                3: lambda: Racunalnik(self, AlphaBeta(4)),
                                4: lambda: Racunalnik(self, AlphaBeta(6)),
-                               5: lambda: Racunalnik(self, AlphaBeta(8)),
-                               99: lambda: Racunalnik(self, Minimax(2))} # 99 - za testne namene, če še želimo star algoritem preizkušati
+                               5: lambda: Racunalnik(self, AlphaBeta(8))}
 
         # Slovar 'tipov' igre
-        self.tip_igre = {0: lambda: Igra(),
+        self.tip_igre = {0: lambda: Logika(),
                          1: lambda: Five_logika(),
                          2: lambda: Pop_logika(),
                          3: lambda: Powerup_logika(),
@@ -81,11 +84,20 @@ class Gui():
         self.ime_r.set('Rdeči') # Po defaultu je rdečemu ime 'Rdeči'
         self.ime_y = tkinter.StringVar() # Ime igralca z rumenimi žetoni
         self.ime_y.set('Rumeni') # Po defaultu je rumenemu ime 'Rumeni'
-        # Beležiti želimo tudi spremembe imena in ga primerno urediti
+        
+        # Beležiti želimo spremembe imen in ju primerno urediti
         self.ime_r.trace('w', lambda name, index, mode: self.uredi_ime(self.ime_r))
         self.ime_y.trace('w', lambda name, index, mode: self.uredi_ime(self.ime_y))
-        # Sledimo tudi spremembam 'self.tip', da vemo, kdaj vklopiti gumbe za power up poteze
-        self.tip.trace('w', lambda name, index, mode: self.stanje_gumbov(self.tip.get(), 1))
+
+        # Dodajmo slike za igro Power Up
+        # OPOZORILO:
+        # Pri spreminjanju velikosti menuja, je potrebno primerno prilagoditi tudi
+        # velikost slik. Dimenziji sta izračunani po formuli:
+        # dim ~ 0.125 * (0.8 * MIN_SIRINA - 3 * OKVIR)
+        self.slika_pup_2x_nw = tkinter.PhotoImage(file='slike/2x-nw-icon.gif')
+        self.slika_pup_2x_w = tkinter.PhotoImage(file='slike/2x-w-icon.gif')
+        self.slika_pup_cross = tkinter.PhotoImage(file='slike/cross-icon.gif')
+        self.slika_pup_stolpec = tkinter.PhotoImage(file='slike/stolpec-icon.gif')
         
         # Če uporabnik zapre okno, naj se pokliče self.zapri_okno
         master.protocol('WM_DELETE_WINDOW', lambda: self.zapri_okno(master))
@@ -178,8 +190,8 @@ class Gui():
         ###############################################################
         ###############################################################
         self.platno = tkinter.Canvas(master,
-                                     width=8*self.VELIKOST_POLJA,
-                                     height=7*self.VELIKOST_POLJA)
+                                     width=8*self.velikost_polja,
+                                     height=7*self.velikost_polja)
         self.platno.pack(fill=tkinter.BOTH, expand=1, side=tkinter.RIGHT)
 
         # Narišemo črte na igralnem polju (ustvarimo igralno površino)
@@ -203,7 +215,7 @@ class Gui():
                                     height=MIN_VISINA,
                                     relief=tkinter.GROOVE,
                                     borderwidth=Gui.OKVIR,
-                                    bg='black')
+                                    bg=Gui.BG_BARVA)
         self.frame1.pack(side=tkinter.LEFT, anchor=tkinter.NW)
         self.frame1.grid_propagate(0)
 
@@ -211,7 +223,7 @@ class Gui():
         self.platno_menu = tkinter.Canvas(self.frame1,
                                           width=Gui.SIRINA_PLATNO_MENU,
                                           height=Gui.VISINA_PLATNO_MENU)
-        self.platno_menu.config(bg='black') # Za čas testiranja
+        self.platno_menu.config(bg=Gui.BG_BARVA)
         self.platno_menu.grid(row=0, column=0, columnspan=4, sticky=tkinter.NW)
 
         # Dodamo možnosti
@@ -265,13 +277,13 @@ class Gui():
         # Najprej nespremenljiv del
         dx = 0.15 * Gui.VISINA_PLATNO_MENU
 
-        self.platno_ime_r = tkinter.Entry(master, fg='red', bg='black',
+        self.platno_ime_r = tkinter.Entry(master, fg='red', bg=Gui.BG_BARVA,
                                 font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/12)),
                                            'bold'),
                                 width='10', borderwidth='0', justify='center',
                                 textvariable=self.ime_r)
                                     
-        self.platno_ime_y = tkinter.Entry(master, fg='yellow', bg='black',
+        self.platno_ime_y = tkinter.Entry(master, fg='yellow', bg=Gui.BG_BARVA,
                                 font=('Helvetica', '{0}'.format(int(Gui.VISINA_PLATNO_MENU/12)),
                                            'bold'),
                                 width='10', borderwidth='0', justify='center',
@@ -303,21 +315,23 @@ class Gui():
     def narisi_okvir(self):
         '''Nariše črte (okvir) na igralno povrčino.'''
         self.platno.delete(Gui.TAG_OKVIR)
-        d = self.VELIKOST_POLJA
+        d = self.velikost_polja
         for i in range(8):
             self.platno.create_line(d/2 + i*d, d/2,
                                     d/2 + i*d, 13*d/2,
+                                    width=2,
                                     tag=Gui.TAG_OKVIR)
         for i in range(7):
             self.platno.create_line(d/2, d/2 + i*d,
                                     15*d/2, d/2 + i*d,
+                                    width=2,
                                     tag=Gui.TAG_OKVIR)
 
     def narisi_R(self, p):
-        d = self.VELIKOST_POLJA
+        d = self.velikost_polja
         x = (p[0] + 1) * d
         y = (6 - p[1]) * d
-        gap = self.VELIKOST_GAP
+        gap = self.velikost_gap
         self.platno.create_oval(x - d/2 + gap, y - d/2 + gap,
                                 x + d/2 - gap, y + d/2 - gap,
                                 fill = 'red',
@@ -396,47 +410,49 @@ class Gui():
                 pup_r = self.igra.powerups[0] # Power ups za rdečega
                 pup_y = self.igra.powerups[1] # Power ups za rumenega
                 stranica = Gui.SIRINA_PLATNO_MENU * 0.75 / 6
-                # TOLE SO ZAČASNI PLACEHOLDERJI
-                # TODO
                 # Za rdečega igralca
                 if pup_r[0] > 0:
-                    self.platno_menu.create_rectangle(10, Gui.VISINA_PLATNO_MENU / 3,
-                                                      10 + stranica, Gui.VISINA_PLATNO_MENU / 3 + stranica,
-                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_image(10, Gui.VISINA_PLATNO_MENU / 3,
+                                                  image=self.slika_pup_stolpec,
+                                                  anchor=tkinter.NW, tag=Gui.TAG_SPREMENLJIVI)
                 if pup_r[1] > 0:
-                    self.platno_menu.create_rectangle(10, Gui.VISINA_PLATNO_MENU / 2,
-                                                      10 + stranica, Gui.VISINA_PLATNO_MENU / 2 + stranica,
-                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_oval(10, Gui.VISINA_PLATNO_MENU / 2,
+                                                      10 + stranica,
+                                                      Gui.VISINA_PLATNO_MENU / 2 + stranica,
+                                                      fill='yellow', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_image(10, Gui.VISINA_PLATNO_MENU / 2,
+                                                  image=self.slika_pup_cross,
+                                                  anchor=tkinter.NW, tag=Gui.TAG_SPREMENLJIVI)
                 if pup_r[2] > 0:
-                    self.platno_menu.create_rectangle(10, 2 * Gui.VISINA_PLATNO_MENU / 3,
-                                                      10 + stranica, 2 * Gui.VISINA_PLATNO_MENU / 3 + stranica,
-                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_image(10, 2 * Gui.VISINA_PLATNO_MENU / 3,
+                                                  image=self.slika_pup_2x_nw,
+                                                  anchor=tkinter.NW, tag=Gui.TAG_SPREMENLJIVI)
                 if pup_r[3] > 0:
-                    self.platno_menu.create_rectangle(10, 5 * Gui.VISINA_PLATNO_MENU / 6,
-                                                      10 + stranica, 5 * Gui.VISINA_PLATNO_MENU / 6 + stranica,
-                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_image(10, 5 * Gui.VISINA_PLATNO_MENU / 6,
+                                                  image=self.slika_pup_2x_w,
+                                                  anchor=tkinter.NW, tag=Gui.TAG_SPREMENLJIVI)
 
                 # Za rumenega igralca
                 if pup_y[0] > 0:
-                    self.platno_menu.create_rectangle(Gui.SIRINA_PLATNO_MENU - 10, Gui.VISINA_PLATNO_MENU / 3,
-                                                      Gui.SIRINA_PLATNO_MENU - 10 - stranica,
-                                                      Gui.VISINA_PLATNO_MENU / 3 + stranica,
-                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_image(Gui.SIRINA_PLATNO_MENU - 10, Gui.VISINA_PLATNO_MENU / 3,
+                                                  image=self.slika_pup_stolpec,
+                                                  anchor=tkinter.NE, tag=Gui.TAG_SPREMENLJIVI)
                 if pup_y[1] > 0:
-                    self.platno_menu.create_rectangle(Gui.SIRINA_PLATNO_MENU - 10, Gui.VISINA_PLATNO_MENU / 2,
+                    self.platno_menu.create_oval(Gui.SIRINA_PLATNO_MENU - 10, Gui.VISINA_PLATNO_MENU / 2,
                                                       Gui.SIRINA_PLATNO_MENU - 10 - stranica,
                                                       Gui.VISINA_PLATNO_MENU / 2 + stranica,
-                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                                                      fill='red', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_image(Gui.SIRINA_PLATNO_MENU - 10, Gui.VISINA_PLATNO_MENU / 2,
+                                                  image=self.slika_pup_cross,
+                                                  anchor=tkinter.NE, tag=Gui.TAG_SPREMENLJIVI)
                 if pup_y[2] > 0:
-                    self.platno_menu.create_rectangle(Gui.SIRINA_PLATNO_MENU - 10, 2 * Gui.VISINA_PLATNO_MENU / 3,
-                                                      Gui.SIRINA_PLATNO_MENU - 10 - stranica,
-                                                      2 * Gui.VISINA_PLATNO_MENU / 3 + stranica,
-                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_image(Gui.SIRINA_PLATNO_MENU - 10, 2 * Gui.VISINA_PLATNO_MENU / 3,
+                                                  image=self.slika_pup_2x_nw,
+                                                  anchor=tkinter.NE, tag=Gui.TAG_SPREMENLJIVI)
                 if pup_y[3] > 0:
-                    self.platno_menu.create_rectangle(Gui.SIRINA_PLATNO_MENU - 10, 5 * Gui.VISINA_PLATNO_MENU / 6,
-                                                      Gui.SIRINA_PLATNO_MENU - 10 - stranica,
-                                                      5 * Gui.VISINA_PLATNO_MENU / 6 + stranica,
-                                                      fill='white', tag=Gui.TAG_SPREMENLJIVI)
+                    self.platno_menu.create_image(Gui.SIRINA_PLATNO_MENU - 10, 5 * Gui.VISINA_PLATNO_MENU / 6,
+                                                  image=self.slika_pup_2x_w,
+                                                  anchor=tkinter.NE, tag=Gui.TAG_SPREMENLJIVI)
             elif isinstance(self.igra, Pop10_logika):
                 # Dodajmo grafični prikaz odstranjenih žetonov
                 premer = Gui.SIRINA_PLATNO_MENU * 0.7 / 6
@@ -493,7 +509,7 @@ class Gui():
 
     def narisi_crtice(self):
         # Pomožne črte za 5 v vrsto
-        d = self.VELIKOST_POLJA
+        d = self.velikost_polja
         for i in range(6):
             barva1 = 'yellow' if i%2 == 0 else 'red'
             barva2 = 'red' if i%2 == 0 else 'yellow'
@@ -509,10 +525,10 @@ class Gui():
                                     width=5)
 
     def narisi_Y(self, p):
-        d = self.VELIKOST_POLJA
+        d = self.velikost_polja
         x = (p[0] + 1) * d
         y = (6 - p[1]) * d
-        gap = self.VELIKOST_GAP
+        gap = self.velikost_gap
         self.platno.create_oval(x - d/2 + gap, y - d/2 + gap,
                                 x + d/2 - gap, y + d/2 - gap,
                                 fill = 'yellow',
@@ -539,7 +555,7 @@ class Gui():
         self.zacni_igro()
 
     def obkrozi(self, stirke):
-        d = self.VELIKOST_POLJA
+        d = self.velikost_polja
         w = 5 # Odsvetujem spreminjanje (namenoma je fiksna vrednost)
         for stirka in stirke: # Gremo po vseh štirkah
             (i1,j1) = stirka[0]
@@ -592,14 +608,13 @@ class Gui():
 
     def platno_klik(self, event):
         (x,y) = (event.x, event.y)
-        d = self.VELIKOST_POLJA
-        if (x < d/2) or (x > 15*d/2) or (y < d/2) or (y > 13*d/2):
+        d = self.velikost_polja
+        if (x < d/2) or (x >= 15*d/2) or (y < d/2) or (y >= 13*d/2):
             # V tem primeru smo zunaj igralnega območja
             pass
         else:
-            # TODO - preveri za robne pogoje
-            i = int((x - d/2) // self.VELIKOST_POLJA) + 1
-            j = 5 - int((y - d/2) // self.VELIKOST_POLJA)
+            i = int((x - d/2) // d) + 1
+            j = 5 - int((y - d/2) // d)
             if isinstance(self.igra, Powerup_logika):
                 # Imamo Power Up igro
                 if self.pup.get() == 0:
@@ -635,6 +650,7 @@ class Gui():
         '''Razveljavimo zadnjo potezo in prikažemo prejšnje stanje.'''
 
         # Razveljavimo prejšnjo potezo
+        # Če je en igralec računalnik, razveljavimo do zadnje igralčeve poteze
         if isinstance(self.igralec_r, Racunalnik):
             if isinstance(self.igralec_y, Racunalnik):
                 # Oba igralca sta računalnik, ne naredi ničesar
@@ -642,20 +658,42 @@ class Gui():
             elif self.igra.na_potezi == IGRALEC_R:
                 # Na potezi računalnik, ne naredi ničesar
                 return
-            elif self.igra.na_potezi == IGRALEC_Y:
+            elif self.igra.na_potezi == IGRALEC_Y and not isinstance(self.igra, Powerup_logika) and not isinstance(self.igra, Pop10_logika):
+                # Gremo 2 potezi nazaj
                 novo_stanje = self.igra.razveljavi(2)
             else:
-                # Igre je konec
-                novo_stanje = self.igra.razveljavi(2)
+                # Želimo iti toliko korakov nazaj, da bo na potezi ponovno človek
+                koliko_nazaj = [0, False] # Nam pove, koliko potez nazaj moramo it in če je že sploh bil človek na potezi
+                zgodovina = self.igra.zgodovina[:self.igra.stevec] # Omejimo se na zgodovino glede na trenutni položaj
+                for zgo in zgodovina[::-1]:
+                    koliko_nazaj[0] += 1
+                    if zgo[1] == IGRALEC_Y:
+                        koliko_nazaj[1] = True
+                        break
+                if koliko_nazaj[1]:
+                    novo_stanje = self.igra.razveljavi(koliko_nazaj[0])
+                else:
+                    return
         elif isinstance(self.igralec_y, Racunalnik):
             if self.igra.na_potezi == IGRALEC_Y:
                 # Na potezi računalnik, ne naredi ničesar
                 return
-            elif self.igra.na_potezi == IGRALEC_R:
+            elif self.igra.na_potezi == IGRALEC_R and not isinstance(self.igra, Powerup_logika) and not isinstance(self.igra, Pop10_logika):
+                # Gremo 2 potezi nazaj
                 novo_stanje = self.igra.razveljavi(2)
             else:
-                # TODO
-                novo_stanje = self.igra.razveljavi(2)
+                # Želimo iti toliko korakov nazaj, da bo na potezi ponovno človek
+                koliko_nazaj = [0, False] # Nam pove, koliko potez nazaj moramo it in če je že sploh bil človek na potezi
+                zgodovina = self.igra.zgodovina[:self.igra.stevec] # Omejimo se na zgodovino glede na trenutni položaj
+                for zgo in zgodovina[::-1]:
+                    koliko_nazaj[0] += 1
+                    if zgo[1] == IGRALEC_R:
+                        koliko_nazaj[1] = True
+                        break
+                if koliko_nazaj[1]:
+                    novo_stanje = self.igra.razveljavi(koliko_nazaj[0])
+                else:
+                    return
         else:
             novo_stanje = self.igra.razveljavi()
 
@@ -666,17 +704,18 @@ class Gui():
             # Narišemo novi (trenutni) položaj
             self.narisi_polozaj(novo_stanje[0])
 
+            # Posodobimo stanje gumbov za powerupe
+            self.stanje_gumbov()
+
             # Popravimo napis nad igralno površino
             self.narisi_platno_menu()
             if self.igra.na_potezi == IGRALEC_R:
-                #self.napis.set('Na potezi je RDEČI!')
                 self.igralec_r.igraj()
             elif self.igra.na_potezi == IGRALEC_Y:
-                #self.napis.set('Na potezi je RUMENI!')
                 self.igralec_y.igraj()
         else:
             # Smo na začetku 'zgodovine' (igre)
-            pass
+            return
 
     def platno_uveljavi(self, event=None):
         '''Uveljavimo zadnjo razveljavljeno potezo in se vrnemo v njeno stanje.'''
@@ -689,20 +728,30 @@ class Gui():
             elif self.igra.na_potezi == IGRALEC_R:
                 # Na potezi računalnik, ne naredi ničesar
                 return
-            elif self.igra.na_potezi == IGRALEC_Y:
-                novo_stanje = self.igra.uveljavi(2)
             else:
-                # Igre je konec
-                novo_stanje = self.igra.uveljavi(2)
+                # Lahko, da je naslednja računalnikova poteza bila dvojna, ali pa igre več ni
+                koliko_naprej = 0 # Pove, koliko potez moramo iti naprej, da bo ponovno na potezi človek, ali pa bo konec igre
+                # Najprej pa nas zanima, kje v zgodovini se sploh nahajamo
+                prihodnost = self.igra.zgodovina[self.igra.stevec+1:] + [self.igra.zadnja]
+                for prih in prihodnost:
+                    koliko_naprej += 1
+                    if prih[1] == IGRALEC_Y:
+                        break
+                novo_stanje = self.igra.uveljavi(koliko_naprej)
         elif isinstance(self.igralec_y, Racunalnik):
             if self.igra.na_potezi == IGRALEC_Y:
                 # Na potezi računalnik, ne naredi ničesar
                 return
-            elif self.igra.na_potezi == IGRALEC_R:
-                novo_stanje = self.igra.uveljavi(2)
             else:
-                # TODO
-                novo_stanje = self.igra.uveljavi(2)
+                # Lahko, da je naslednja računalnikova poteza bila dvojna, ali pa igre več ni
+                koliko_naprej = 0 # Pove, koliko potez moramo iti naprej, da bo ponovno na potezi človek, ali pa bo konec igre
+                # Najprej pa nas zanima, kje v zgodovini se sploh nahajamo
+                prihodnost = self.igra.zgodovina[self.igra.stevec+1:] + [self.igra.zadnja]
+                for prih in prihodnost:
+                    koliko_naprej += 1
+                    if prih[1] == IGRALEC_Y:
+                        break
+                novo_stanje = self.igra.uveljavi(koliko_naprej)
         else:
             novo_stanje = self.igra.uveljavi()
 
@@ -713,6 +762,9 @@ class Gui():
 
             # Narišemo novi (trenutni) položaj
             self.narisi_polozaj(novo_stanje[0])
+
+            # Posodobimo stanje gumbov za powerupe
+            self.stanje_gumbov()
 
             # Uredimo grafični prikaz
             if self.igra.na_potezi == IGRALEC_R:
@@ -756,11 +808,12 @@ class Gui():
                     self.narisi_Y(p1)
                     self.narisi_Y(p2)
 
+                # Uredimo stanje gumbov
+                self.stanje_gumbov()
                 # Preverimo, kako se bo igra nadaljevala
                 if zmagovalec2 == NI_KONEC:
                     # Igre še ni konec
                     self.narisi_platno_menu()
-                    self.stanje_gumbov(self.tip.get())
                     if self.igra.na_potezi == IGRALEC_R:
                         self.igralec_r.igraj()
                     elif self.igra.na_potezi == IGRALEC_Y:
@@ -779,6 +832,7 @@ class Gui():
                     # ko povlečemo potezo, unselectamo
                     self.pup.set(0)
                     self.pup_pomozni = 0
+                self.stanje_gumbov()
                 (zmagovalec, stirka, p1, osvezi) = t # Tukaj je p1 položaj na platnu
                 if osvezi:
                     self.platno.delete(Gui.TAG_FIGURA)
@@ -798,7 +852,6 @@ class Gui():
                 if zmagovalec == NI_KONEC:
                     # Igre še ni konec
                     self.narisi_platno_menu()
-                    self.stanje_gumbov(self.tip.get())
                     if self.igra.na_potezi == IGRALEC_R:
                         self.igralec_r.igraj()
                     elif self.igra.na_potezi == IGRALEC_Y:
@@ -819,8 +872,8 @@ class Gui():
             glede na velikost celotnega okna.'''
         self.platno.delete('all')
         (w,h) = (event.width, event.height)
-        self.VELIKOST_POLJA = min(w / 8, h / 7)
-        self.VELIKOST_GAP = self.VELIKOST_POLJA / 20
+        self.velikost_polja = min(w / 8, h / 7)
+        self.velikost_gap = self.velikost_polja / 20
         self.platno.config(width=w-0.9*MIN_SIRINA, height=h-200)
         self.narisi_okvir()
         self.narisi_polozaj(self.igra.polozaj)
@@ -828,25 +881,29 @@ class Gui():
             (zmagovalec, stirka) = self.igra.stanje_igre()
             self.koncaj_igro(zmagovalec, stirka)
 
-    def stanje_gumbov(self, tip, indikator=0):
+    def stanje_gumbov(self, indikator=0):
         '''Vklopi gumbe za power upe, če smo v pravi igri, sicer jih izklopi.'''
+        # Če je indikator = 1, smo v igro prišli preko trace metode, torej se je zamenjal tip igre
+        # To se uporablja, ker bi drugače želeli dobiti self.igra.powerups, še preden bi bili v pravilni igri
+        tip = self.tip.get()
         if tip == 3:
             # Imamo power up igro, vklopi gumbe
             if self.igra.na_potezi is not None:
                 if indikator == 0:
-                    if self.igra.powerups[self.igra.na_potezi-1][0]:
+                    kateri_igr = 0 if self.igra.na_potezi == IGRALEC_R else 1 # Nam pove, kateri seznam powerupov gledamo
+                    if self.igra.powerups[kateri_igr][0]:
                         self.gumb_pup1.config(state=tkinter.NORMAL)
                     else:
                         self.gumb_pup1.config(state=tkinter.DISABLED)
-                    if self.igra.powerups[self.igra.na_potezi-1][1]:
+                    if self.igra.powerups[kateri_igr][1]:
                         self.gumb_pup2.config(state=tkinter.NORMAL)
                     else:
                         self.gumb_pup2.config(state=tkinter.DISABLED)
-                    if self.igra.powerups[self.igra.na_potezi-1][2]:
+                    if self.igra.powerups[kateri_igr][2]:
                         self.gumb_pup3.config(state=tkinter.NORMAL)
                     else:
                         self.gumb_pup3.config(state=tkinter.DISABLED)
-                    if self.igra.powerups[self.igra.na_potezi-1][3]:
+                    if self.igra.powerups[kateri_igr][3]:
                         self.gumb_pup4.config(state=tkinter.NORMAL)
                     else:
                         self.gumb_pup4.config(state=tkinter.DISABLED)
@@ -855,6 +912,11 @@ class Gui():
                     self.gumb_pup2.config(state=tkinter.NORMAL)
                     self.gumb_pup3.config(state=tkinter.NORMAL)
                     self.gumb_pup4.config(state=tkinter.NORMAL)
+            else:
+                self.gumb_pup1.config(state=tkinter.DISABLED)
+                self.gumb_pup2.config(state=tkinter.DISABLED)
+                self.gumb_pup3.config(state=tkinter.DISABLED)
+                self.gumb_pup4.config(state=tkinter.DISABLED)
         else:
             # Izklopi gumbe
             self.gumb_pup1.config(state=tkinter.DISABLED)
@@ -888,7 +950,7 @@ class Gui():
         self.igra = self.tip_igre[self.tip.get()]()
 
         # Nastavimo aktivnost gumbov za 'power up'-e
-        self.stanje_gumbov(self.tip.get())
+        self.stanje_gumbov()
 
         if isinstance(self.igra, Five_logika):
             self.narisi_crtice()
@@ -904,7 +966,6 @@ class Gui():
 
     def zapri_okno(self, master):
         '''Ta metoda se pokliče, ko uporabnik zapre aplikacijo.'''
-        # TODO
         # Igralce najprej ustavimo
         self.prekini_igralce()
 

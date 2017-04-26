@@ -1,8 +1,8 @@
+import random
+
 #################
 ## LOGIKA IGRE ##
 #################
-
-import random
 
 IGRALEC_R = 1 # Igralec, ki ima rdeče krogce
 IGRALEC_Y = 2 # Igralec, ki ima rumene krogce
@@ -28,7 +28,7 @@ def nasprotnik(igralec):
         # napaki (če bo itak takoj crknil, potem assert ni potreben).
         assert False, "neveljaven nasprotnik = {0}".format(igralec)
 
-class Igra():
+class Logika():
     # Tabela vseh možnih zmagovalnih kombinacij 4 v vrsto
     stirke = []
     for i in range(7):
@@ -73,7 +73,7 @@ class Igra():
     def kopija(self):
         '''Vrni kopijo te igre, brez zgodovine.'''
         # Potrebujemo, da se ne rišejo poteze, ko računalnik razmišlja
-        k = Igra()
+        k = Logika()
         k.polozaj = [self.polozaj[i][:] for i in range(7)]
         k.na_potezi = self.na_potezi
         k.stevilo_potez = self.stevilo_potez
@@ -152,7 +152,7 @@ class Igra():
             - (NEODLOCENO, None), če je igre konec in je neodločeno,
             - (NI_KONEC, None), če je igra še vedno v teku.'''
         # Najprej preverimo, če obstaja kakšna zmagovalna štirka
-        for s in Igra.stirke:
+        for s in Logika.stirke:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
             barva = self.polozaj[i1][j1]
             if (barva != PRAZNO) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):

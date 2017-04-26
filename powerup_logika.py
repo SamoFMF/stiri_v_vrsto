@@ -1,13 +1,13 @@
-####################
-## LOGIKA POWERUP ##
-####################
-
 from logika import *
 
-class Powerup_logika(Igra):
+#####################
+## LOGIKA POWER UP ##
+#####################
+
+class Powerup_logika(Logika):
 
     def __init__(self):
-        # Prekopiramo __init__ iz objekta Igra
+        # Prekopiramo __init__ iz objekta Logika
         super(Powerup_logika, self).__init__()
 
         # Vsak igralec ima na voljo 4x 'power up'
@@ -28,7 +28,7 @@ class Powerup_logika(Igra):
         '''Vrne zmagovalca, če obstaja po potezi p, None sicer.'''
         i = p-1
         j = self.vrstica(i)
-        for s in Igra.stirke:
+        for s in Logika.stirke:
             if (i,j) in s:
                 ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                 stirka = [self.polozaj[i1][j1], self.polozaj[i2][j2],
