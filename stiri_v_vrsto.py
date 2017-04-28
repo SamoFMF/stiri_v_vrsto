@@ -20,7 +20,6 @@ from alphabeta import AlphaBeta
 # Če že spreminjaš, povečaj, ne zmanjšaj in
 # poizkusi ohraniti razmerje MIN_SIRINA / MIN_VISINA
 # Preden spreminjaš si preberi v README poglavje 'Spreminjanje dimenzij'
-# TODO - Dodaj v README
 MIN_SIRINA = 500
 MIN_VISINA = 555
 ZVP = 100 # Zacetna velikost polja
@@ -247,40 +246,41 @@ class Gui():
         self.platno_menu.grid(row=0, column=0, columnspan=4, sticky=tkinter.NW)
 
         # Dodamo možnosti
+        pad_y = (MIN_VISINA - Gui.VISINA_PLATNO_MENU) * 0.02 # pady vrednost
         self.gumb_nova_igra = tkinter.Button(self.stranski_menu, text='Nova igra',
                                              width=int(0.4*MIN_SIRINA/7.25),
                                              command=lambda: self.zacni_igro(nova=True))
-        self.gumb_nova_igra.grid(row=1, column=0, columnspan=4, pady=5)
+        self.gumb_nova_igra.grid(row=1, column=0, columnspan=4, pady=pad_y)
         self.gumb_naslednja_igra = tkinter.Button(self.stranski_menu, text='Naslednja igra',
                                                   width=int(0.4*MIN_SIRINA/7.25),
                                                   command=self.naslednja_igra)
-        self.gumb_naslednja_igra.grid(row=2, column=0, columnspan=4, pady=(0,5))
+        self.gumb_naslednja_igra.grid(row=2, column=0, columnspan=4, pady=(0,pad_y))
         self.gumb_razveljavi = tkinter.Button(self.stranski_menu, text='Razveljavi',
                                               width=int(0.4*MIN_SIRINA/7.25),
                                               command=self.platno_razveljavi)
-        self.gumb_razveljavi.grid(row=3, column=0, columnspan=4, pady=5)
+        self.gumb_razveljavi.grid(row=3, column=0, columnspan=4, pady=pad_y)
         self.gumb_uveljavi = tkinter.Button(self.stranski_menu, text='Uveljavi',
                                             width=int(0.4*MIN_SIRINA/7.25),
                                             command=self.platno_uveljavi)
-        self.gumb_uveljavi.grid(row=4, column=0, columnspan=4, pady=(0,5))
+        self.gumb_uveljavi.grid(row=4, column=0, columnspan=4, pady=(0,pad_y))
         
         # Ti gumbi so aktivni samo v primeru, da imamo 'Power Up' igro
         self.gumb_pup1 = tkinter.Radiobutton(self.stranski_menu, text='Stolpec',
                                              variable=self.pup, value=1,
                                              command=self.odznaci_gumb)
-        self.gumb_pup1.grid(row=5,column=0, pady=15)
+        self.gumb_pup1.grid(row=5,column=0, pady=3*pad_y)
         self.gumb_pup2 = tkinter.Radiobutton(self.stranski_menu, text='Uniči žeton',
                                              variable=self.pup, value=2,
                                              command=self.odznaci_gumb)
-        self.gumb_pup2.grid(row=5,column=1, pady=15)
+        self.gumb_pup2.grid(row=5,column=1, pady=3*pad_y)
         self.gumb_pup3 = tkinter.Radiobutton(self.stranski_menu, text='2x-NW',
                                              variable=self.pup, value=3,
                                              command=self.odznaci_gumb)
-        self.gumb_pup3.grid(row=5,column=2,pady=15)
+        self.gumb_pup3.grid(row=5,column=2,pady=3*pad_y)
         self.gumb_pup4 = tkinter.Radiobutton(self.stranski_menu, text='2x-W',
                                              variable=self.pup, value=4,
                                              command=self.odznaci_gumb)
-        self.gumb_pup4.grid(row=5,column=3,pady=15)
+        self.gumb_pup4.grid(row=5,column=3,pady=3*pad_y)
 
         # Vsi ti gumbi za power upe na začetku niso aktivni, saj pričnemo z navadno igro 'štiri v vrsto'
         self.gumb_pup1.config(state=tkinter.DISABLED)
@@ -292,7 +292,7 @@ class Gui():
         self.gumb_izhod = tkinter.Button(self.stranski_menu, text='Izhod',
                                          width=int(0.3*0.8*MIN_SIRINA/7.25),
                                          command=lambda: self.zapri_okno(master))
-        self.gumb_izhod.grid(row=6, column=0, columnspan=4, pady=(15,5))
+        self.gumb_izhod.grid(row=6, column=0, columnspan=4, pady=(3*pad_y,pad_y))
 
         # Narišemo figure za platno_menu
         # Najprej nespremenljiv del
@@ -539,6 +539,7 @@ class Gui():
     def narisi_crtice(self):
         '''Nariše pomožne barvne 'črte' za igro 'pet v vrsto'.'''
         d = self.velikost_polja
+        sirina = 5 # Se ne prilagaja velikosti polja, ker je črtice na malih poljih potem nemogoče videti
         for i in range(6):
             barva1 = 'yellow' if i%2 == 0 else 'red'
             barva2 = 'red' if i%2 == 0 else 'yellow'
@@ -546,12 +547,12 @@ class Gui():
                                     d/4, d/2 + 3*d/4 + i*d,
                                     tag=Gui.TAG_FIGURA,
                                     fill=barva1,
-                                    width=5)
+                                    width=sirina)
             self.platno.create_line(8*d - d/4, d/2 + d/4 + i*d,
                                     8*d - d/4, d/2 + 3*d/4 + i*d,
                                     tag=Gui.TAG_FIGURA,
                                     fill=barva2,
-                                    width=5)
+                                    width=sirina)
 
     def narisi_Y(self, p):
         '''Nariše rumeni žeton.'''

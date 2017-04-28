@@ -204,7 +204,7 @@ class AlphaBeta:
                 elif self.jaz == IGRALEC_Y:
                     vrednost += (tocke[1] - delez*tocke[0]) * vrednost_stirke - razlika
                 vrednost *= 0.984**(max(self.igra.stevilo_potez - 42, 0)) if vrednost > 0 else 1
-                return vrednost
+                return vrednost / 10
             else:
                 # Imamo normalno, popout ali powerup igro
                 # Pojdimo sedaj skozi vse možne zmagovalne štirke in jih
