@@ -28,34 +28,24 @@ class Pop_logika(Logika):
         je_popout = False # Če bo poteza popout, bomo morali osvežiti grafični prikaz igralne površine
 
         # Preverimo, če je poteza veljavna
-        if p < 0:
-            k = -(p+1) # Kateri stolpec to dejansko je
-            if racunalnik or p in poteze:
-                # Imamo popout potezo
-                if len(self.zgodovina) > self.stevec:
-                    self.zgodovina = self.zgodovina[:self.stevec]
-                self.shrani_polozaj()
+        if racunalnik or p in poteze:
+            # Poteza je veljavna
+            if len(self.zgodovina) > self.stevec:
+                # Bili smo v zgodovini in povlekli novo potezo
+                # Vsaj zgodovina naprej od števca torej 'zapade'
+                self.zgodovina = self.zgodovina[:self.stevec]
+            self.shrani_polozaj()
+            if p < 0:
+                # Imamo Pop out potezo
+                k = -p-1 # Kateri stolpec to dejansko je
                 # Odstranimo spodnji žeton
                 del self.polozaj[k][0]
                 self.polozaj[k].append(PRAZNO)
-                j = 0
                 je_popout = True
-            elif -p in poteze:
-                if len(self.zgodovina) > self.stevec:
-                    self.zgodovina = self.zgodovina[:self.stevec]
-                self.shrani_polozaj()
-                j = self.vrstica(k)
-                self.polozaj[k][j] = self.na_potezi
             else:
-                # Poteza ni veljavna
-                return None
-        elif racunalnik or p in poteze:
-            # Poteza je veljavna
-            if len(self.zgodovina) > self.stevec:
-                self.zgodovina = self.zgodovina[:self.stevec]
-            self.shrani_polozaj()
-            j = self.vrstica(p-1)
-            self.polozaj[p-1][j] = self.na_potezi
+                # Imamo 'navadno' potezo
+                j = self.vrstica(p-1)
+                self.polozaj[p-1][j] = self.na_potezi
         else:
             # Poteza ni veljavna
             return None
@@ -67,23 +57,24 @@ class Pop_logika(Logika):
         else:
             # Igra se je zaključila
             self.na_potezi = None
-        self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
-        return (zmagovalec, stirka, (k,j) if p<0 else (p-1,j), je_popout)
+        return (zmagovalec, stirka, (p-1,j) if p>0 else None, je_popout) # Če je p<0, je je_popout=True, torej ne izrisujemo poteze, ki je torej lahko None
 
     def stanje_igre(self):
         '''Vrne nam trenutno stanje igre. Možnosti so:
-            - (IGRALEC_R, stirka), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
-            - (IGRALEC_Y, stirka), če je igre konec in je zmagal IGRALEC_Y z dano zmagovalno štirko,
-            - (NEODLOCENO, None), če je igre konec in je neodločeno,
+            - (IGRALEC_R, [stirka]), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
+            - (IGRALEC_Y, [stirka]), če je igre konec in je zmagal IGRALEC_Y z dano zmagovalno štirko,
+            - (NEODLOCENO, None), če je igre konec in je neodločeno ter ni nobenih štirk,
+            - (NEODLOCENO, [stirki]), če je igre konec in je neodločeno ter sta štirki različnih barv,
             - (NI_KONEC, None), če je igra še vedno v teku.'''
-        # Najprej preverimo, če obstaja kakšna zmagovalna štirka
-        zmagovalci = []
-        stirke = []
+        # Najprej preverimo, če obstaja kakšna zmagovalna štirka ali izenačitveni štirki
+        # Hranili bomo največ 1 štirko na igralca
+        zmagovalci = [] # Seznam igralcev, ki imajo vsaj 1 štirko
+        stirke = [] # Štirke različnih igralcev
         for s in Logika.stirke:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
             barva = self.polozaj[i1][j1]
             if (barva != PRAZNO) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
-                # s je naša zmagovalna štirka
+                # s se pojavi v igri
                 if barva in zmagovalci:
                     # Ta igralec že ima vsaj 1 zmagovalno štirko
                     continue
@@ -113,7 +104,7 @@ class Pop_logika(Logika):
             if a[-1] == PRAZNO:
                 # V stolpcu je še vsaj 1 prosto mesto
                 poteze.append(i+1)
-            if barva and a[0] == barva:
+            if a[0] == barva:
                 # Spodnji element stolpca je od igralca, ki je na potezi
                 poteze.append(-i-1)
         return poteze

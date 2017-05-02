@@ -5,7 +5,7 @@ import random
 from logika import *
 from pop_logika import Pop_logika
 from five_logika import Five_logika
-from powerup_logika import Powerup_logika
+from powerup_logika import Powerup_logika, POWER_STOLPEC, POWER_ZETON, POWER_2X_NW, POWER_2X_W
 from pop10_logika import Pop10_logika
 from clovek import *
 from racunalnik import *
@@ -435,11 +435,11 @@ class Gui():
                 pup_y = self.igra.powerups[1] # Power ups za rumenega
                 stranica = Gui.SIRINA_PLATNO_MENU * 0.75 / 6 # Premer kroga za power up 'uniči žeton'
                 # Za rdečega igralca
-                if pup_r[0] > 0:
+                if pup_r[POWER_STOLPEC] > 0:
                     self.platno_menu.create_image(Gui.ODMIK, Gui.VISINA_PLATNO_MENU / 3,
                                                   image=self.slika_pup_stolpec,
                                                   anchor=tkinter.NW, tag=Gui.TAG_SPREMENLJIVI)
-                if pup_r[1] > 0:
+                if pup_r[POWER_ZETON] > 0:
                     self.platno_menu.create_oval(Gui.ODMIK, Gui.VISINA_PLATNO_MENU / 2,
                                                       Gui.ODMIK + stranica,
                                                       Gui.VISINA_PLATNO_MENU / 2 + stranica,
@@ -447,21 +447,21 @@ class Gui():
                     self.platno_menu.create_image(Gui.ODMIK, Gui.VISINA_PLATNO_MENU / 2,
                                                   image=self.slika_pup_cross,
                                                   anchor=tkinter.NW, tag=Gui.TAG_SPREMENLJIVI)
-                if pup_r[2] > 0:
+                if pup_r[POWER_2X_NW] > 0:
                     self.platno_menu.create_image(Gui.ODMIK, 2 * Gui.VISINA_PLATNO_MENU / 3,
                                                   image=self.slika_pup_2x_nw,
                                                   anchor=tkinter.NW, tag=Gui.TAG_SPREMENLJIVI)
-                if pup_r[3] > 0:
+                if pup_r[POWER_2X_W] > 0:
                     self.platno_menu.create_image(Gui.ODMIK, 5 * Gui.VISINA_PLATNO_MENU / 6,
                                                   image=self.slika_pup_2x_w,
                                                   anchor=tkinter.NW, tag=Gui.TAG_SPREMENLJIVI)
 
                 # Za rumenega igralca
-                if pup_y[0] > 0:
+                if pup_y[POWER_STOLPEC] > 0:
                     self.platno_menu.create_image(Gui.SIRINA_PLATNO_MENU - Gui.ODMIK, Gui.VISINA_PLATNO_MENU / 3,
                                                   image=self.slika_pup_stolpec,
                                                   anchor=tkinter.NE, tag=Gui.TAG_SPREMENLJIVI)
-                if pup_y[1] > 0:
+                if pup_y[POWER_ZETON] > 0:
                     self.platno_menu.create_oval(Gui.SIRINA_PLATNO_MENU - Gui.ODMIK, Gui.VISINA_PLATNO_MENU / 2,
                                                       Gui.SIRINA_PLATNO_MENU - Gui.ODMIK - stranica,
                                                       Gui.VISINA_PLATNO_MENU / 2 + stranica,
@@ -469,11 +469,11 @@ class Gui():
                     self.platno_menu.create_image(Gui.SIRINA_PLATNO_MENU - Gui.ODMIK, Gui.VISINA_PLATNO_MENU / 2,
                                                   image=self.slika_pup_cross,
                                                   anchor=tkinter.NE, tag=Gui.TAG_SPREMENLJIVI)
-                if pup_y[2] > 0:
+                if pup_y[POWER_2X_NW] > 0:
                     self.platno_menu.create_image(Gui.SIRINA_PLATNO_MENU - Gui.ODMIK, 2 * Gui.VISINA_PLATNO_MENU / 3,
                                                   image=self.slika_pup_2x_nw,
                                                   anchor=tkinter.NE, tag=Gui.TAG_SPREMENLJIVI)
-                if pup_y[3] > 0:
+                if pup_y[POWER_2X_W] > 0:
                     self.platno_menu.create_image(Gui.SIRINA_PLATNO_MENU - Gui.ODMIK, 5 * Gui.VISINA_PLATNO_MENU / 6,
                                                   image=self.slika_pup_2x_w,
                                                   anchor=tkinter.NE, tag=Gui.TAG_SPREMENLJIVI)
@@ -938,27 +938,25 @@ class Gui():
 
     def stanje_gumbov(self):
         '''Vklopi gumbe za power upe, če smo v pravi igri, sicer jih izklopi.'''
-        # Če je indikator = 1, smo v igro prišli preko trace metode, torej se je zamenjal tip igre
-        # To se uporablja, ker bi drugače želeli dobiti self.igra.powerups, še preden bi bili v pravilni igri
         tip = self.tip_igre.get()
         if tip == 3:
             # Imamo power up igro, vklopi gumbe
             if (self.igra.na_potezi is not None) and ((self.igra.na_potezi == IGRALEC_R and isinstance(self.igralec_r, Clovek)) or (self.igra.na_potezi == IGRALEC_Y and isinstance(self.igralec_y, Clovek))):
                 # Nekdo je na potezi in ta nekdo je človek
                 kateri_igr = 0 if self.igra.na_potezi == IGRALEC_R else 1 # Nam pove, kateri seznam powerupov gledamo
-                if self.igra.powerups[kateri_igr][0]:
+                if self.igra.powerups[kateri_igr][POWER_STOLPEC]:
                     self.gumb_pup1.config(state=tkinter.NORMAL)
                 else:
                     self.gumb_pup1.config(state=tkinter.DISABLED)
-                if self.igra.powerups[kateri_igr][1]:
+                if self.igra.powerups[kateri_igr][POWER_ZETON]:
                     self.gumb_pup2.config(state=tkinter.NORMAL)
                 else:
                     self.gumb_pup2.config(state=tkinter.DISABLED)
-                if self.igra.powerups[kateri_igr][2]:
+                if self.igra.powerups[kateri_igr][POWER_2X_NW]:
                     self.gumb_pup3.config(state=tkinter.NORMAL)
                 else:
                     self.gumb_pup3.config(state=tkinter.DISABLED)
-                if self.igra.powerups[kateri_igr][3]:
+                if self.igra.powerups[kateri_igr][POWER_2X_W]:
                     self.gumb_pup4.config(state=tkinter.NORMAL)
                 else:
                     self.gumb_pup4.config(state=tkinter.DISABLED)

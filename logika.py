@@ -9,9 +9,10 @@ IGRALEC_Y = 2 # Igralec, ki ima rumene krogce
 PRAZNO = 0 # Prazno polje
 NEODLOCENO = "neodločeno" # Igra se je končala z neodločenim izzidom
 NI_KONEC = "ni konec" # Igre še ni konec
+MAKSIMALNO_STEVILO_POTEZ = 150 # Najdaljša dovoljena igra (da nimamo neskončnih iger)
 
 def nasprotnik(igralec):
-    """Vrni nasprotnika od igralca."""
+    '''Vrne nasprotnika od igralca.'''
     if igralec == IGRALEC_R:
         return IGRALEC_Y
     elif igralec == IGRALEC_Y:
@@ -28,7 +29,7 @@ def nasprotnik(igralec):
         assert False, "neveljaven nasprotnik = {0}".format(igralec)
 
 class Logika():
-    # Tabela vseh možnih zmagovalnih kombinacij 4 v vrsto
+    # Tabela vseh možnih zmagovalnih kombinacij igre 4 v vrsto (hrani položaje)
     stirke = []
     for i in range(7):
         for j in range(3): # Navpične
@@ -47,26 +48,20 @@ class Logika():
         self.polozaj = [[PRAZNO]*6 for i in range(7)]
 
         # Prvi na potezi je naključni igralec.
-        x=random.choice([1,2])
-        if x%2==0:
-            self.na_potezi = IGRALEC_R
-        if x%2==1:
-            self.na_potezi = IGRALEC_Y
+        self.na_potezi = random.choice([IGRALEC_R, IGRALEC_Y])
 
         # Shranjujmo si zgodovino, da lahko uporabimo 'undo'
         self.zgodovina = []
 
-        # Števec, ki nam pove, katero potezo si ogledujemo
-        # Z njim lahko gremo v 'preteklost'
+        # Števec, ki nam pove, na katerem mestu v zgodovini smo
         self.stevec = 0
 
-        # To je začasna rešitev, dokler ne najdem boljše
-        # Je zadnje stanje, če želiš `Redo`-jati do konca
-        self.zadnja = ([[PRAZNO]*6 for i in range(7)], self.na_potezi)
+        # Zadnje stanje igre, če želiš `Redo`-jati do konca
+        self.zadnja_poteza = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
 
         # Število potez, ki se nato uporabi pri računanju vrednosti položaja
         # To imamo zato, ker število žetonov na plošči ni vedno
-        #   pokazatelj števila odigranih potez (glej Pop Out)
+        #   točen pokazatelj števila odigranih potez (glej Pop Out)
         self.stevilo_potez = 0
 
     def kopija(self):
@@ -93,6 +88,8 @@ class Logika():
         if racunalnik or p in poteze:
             # Poteza je veljavna
             if len(self.zgodovina) > self.stevec:
+                # Bili smo v zgodovini in povlekli novo potezo
+                # Vsaj zgodovina naprej od števca torej 'zapade'
                 self.zgodovina = self.zgodovina[:self.stevec]
             self.shrani_polozaj()
             j = self.vrstica(p-1)
@@ -108,12 +105,18 @@ class Logika():
         else:
             # Igra se je zaključila
             self.na_potezi = None
-        self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
         return (zmagovalec, stirka, (p-1,j), False)
 
     def razveljavi(self, i=1):
-        '''Razveljavi potezo in se vrne v prejšnje stanje.'''
+        '''Razveljavi potezo in se vrne v prejšnje stanje.
+            Uspe razveljaviti -> vrne prejšnje stanje, None sicer.'''
         if self.stevec > i-1:
+            # Zgodovina je dovolj globoka, da gremo 'i' korakov nazaj
+            if self.stevec == len(self.zgodovina):
+                # Smo bili na koncu zgodovine, ki pa ne hrani trenutnega stanja
+                # Zato si ga shranimo v self.zadnja_poteza
+                # TODO
+                self.zadnja_poteza = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
             self.stevec -= i
             (self.polozaj, self.na_potezi) = self.zgodovina[self.stevec]
             self.stevilo_potez -= i
@@ -131,8 +134,8 @@ class Logika():
 
     def stanje_igre(self):
         '''Vrne nam trenutno stanje igre. Možnosti so:
-            - (IGRALEC_R, stirka), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
-            - (IGRALEC_Y, stirka), če je igre konec in je zmagal IGRALEC_Y z dano zmagovalno štirko,
+            - (IGRALEC_R, [stirka]), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
+            - (IGRALEC_Y, [stirka]), če je igre konec in je zmagal IGRALEC_Y z dano zmagovalno štirko,
             - (NEODLOCENO, None), če je igre konec in je neodločeno,
             - (NI_KONEC, None), če je igra še vedno v teku.'''
         # Najprej preverimo, če obstaja kakšna zmagovalna štirka
@@ -153,15 +156,17 @@ class Logika():
             return (NEODLOCENO, None)
 
     def uveljavi(self, i=1):
-        '''Uveljavi zadnjo razveljavljeno potezo in se vrne v njeno stanje.'''
-        if self.stevec < len(self.zgodovina)-i: # -i začasno, dokler ne dodam zadnje poteze
+        '''Uveljavi zadnjo razveljavljeno potezo in se vrne v njeno stanje.
+            Uspe uveljaviti -> vrne novo stanje, None sicer.'''
+        # TODO
+        if self.stevec < len(self.zgodovina)-i:
             self.stevec += i
             (self.polozaj, self.na_potezi) = self.zgodovina[self.stevec]
             self.stevilo_potez += i
             return (self.polozaj, self.na_potezi)
         elif self.stevec == len(self.zgodovina)-i:
             self.stevec += i
-            (self.polozaj, self.na_potezi) = self.zadnja
+            (self.polozaj, self.na_potezi) = self.zadnja_poteza
             self.stevilo_potez += i
             return (self.polozaj, self.na_potezi)
         else:
@@ -176,10 +181,11 @@ class Logika():
         return poteze
     
     def vrstica(self, i):
+        '''Vrne najnižjo vrstico, ki je na voljo v i-tem stolpcu,
+            oz. None, če je ni.'''
         for (j,b) in enumerate(self.polozaj[i]):
             if b == PRAZNO:
                 # Kličemo samo v primeru, ko imamo veljavno potezo,
                 # torej bo vedno obstajal tak b
                 return j
-        # Do tega ob pravilni uporabi ne bi smelo priti
         return None

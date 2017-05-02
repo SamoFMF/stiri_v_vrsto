@@ -1,6 +1,6 @@
-from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, nasprotnik
+from logika import IGRALEC_R, IGRALEC_Y, PRAZNO, NEODLOCENO, NI_KONEC, MAKSIMALNO_STEVILO_POTEZ, nasprotnik
 from five_logika import Five_logika
-from powerup_logika import Powerup_logika
+from powerup_logika import Powerup_logika, POWER_STOLPEC, POWER_ZETON, POWER_2X_NW, POWER_2X_W
 from pop10_logika import Pop10_logika
 from pop_logika import Pop_logika
 import random
@@ -34,7 +34,6 @@ class AlphaBeta:
 
         # Poženemo alphabeta
         (poteza, vrednost) = self.alphabeta(self.globina, -AlphaBeta.NESKONCNO, AlphaBeta.NESKONCNO, True)
-        print('igralec = {2}, poteza = {0}, vrednost = {1}'.format(poteza, vrednost, self.jaz))
         self.jaz = None
         self.igra = None
         if not self.prekinitev:
@@ -42,7 +41,7 @@ class AlphaBeta:
             self.poteza = poteza
 
     def uredi_poteze(self, poteze):
-        '''Uredi seznam potez, ki ga nato uporabimo v alphabeta.'''
+        '''Vrne urejen seznam potez, ki ga nato uporabimo v alphabeta.'''
         urejene_poteze = [] # Urejen seznam potez
         if isinstance(self.igra, Five_logika):
             # Imamo 5 v vrsto
@@ -94,7 +93,7 @@ class AlphaBeta:
                 dodajamo += [50+i for i in dodajamo]
                 zeljen_vrstni_red += random.sample(dodajamo, len(dodajamo))                
             else:
-                # Smo v fazi dodajanja žetonov (lahko 0 ali 2)
+                # Smo v fazi dodajanja žetonov (lahko faza 0 ali 2)
                 zeljen_vrstni_red = [4]
                 for i in range(1,4):
                     zeljen_vrstni_red += random.sample([4+i, 4-i], 2)
@@ -120,7 +119,7 @@ class AlphaBeta:
     NESKONCNO = ZMAGA + 1 # Več kot zmaga
 
     def vrednost_pozicije(self):
-        '''Ocena vrednosti polozaja.'''
+        '''Vrne oceno vrednosti polozaja.'''
         vrednost = 0
         if self.igra is None:
             # Če bi se slučajno zgodilo, da ne bi bila izbrana nobena igra
@@ -131,7 +130,8 @@ class AlphaBeta:
             return vrednost
         else:
             delez = 0.8 # Faktor za katerega mu je izguba manj vredna kot dobiček
-            # Najprej preverimo ker tip igre imamo
+            tocke = [0, 0] # Sem bomo shranili število točk igralcev [R,Y]
+            # Najprej preverimo kateri tip igre imamo
             if isinstance(self.igra, Five_logika):
                 # Imamo 5 v vrsto, torej imamo zmagovalne štirke (robne)
                 # ter petke, pokličimo jih spodaj
@@ -145,7 +145,6 @@ class AlphaBeta:
                 # Štirke so vredne 0.2 + a/5 točke, kjer je a število žetonov v štirki,
                 # če je igralec pravilne barve za to štirko.
                 # Petke so vredne a/5 točke, kjer je a število žetonov v petki.
-                tocke = [0, 0] # Sem bomo shranili število točk igralcev [R,Y]
 
                 for s in stirke_R: # Štirke na voljo rdečemu
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
@@ -188,23 +187,22 @@ class AlphaBeta:
                         # V petki so rumeni in rdeči žetoni
                         continue
             elif isinstance(self.igra, Pop10_logika):
-                # TODO - Ocena še ni dobra, včasih čaka preden zmaga itd.
-                # Naš cilj tukaj je, da bi imeli čim več štirk
-                tocke = [0, 0]
-                vrednost_stirke = AlphaBeta.ZMAGA / 30 # Da ne bomo nikoli imeli > ZMAGA brez da smo zmagali. Zo je vbistvu vrednost zmagovalne štirke.
+                # Naš cilj tukaj je, da bi imeli čim več štirk in še pomembneje,
+                # da bi izločili čim več žetonov
+                vrednost_tocke = AlphaBeta.ZMAGA / 30 # Da ne bomo nikoli imeli > ZMAGA brez da smo zmagali. To je vbistvu vrednost zmagovalne štirke.
                 for s in self.igra.stirke:
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                     stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
                               self.igra.polozaj[i3][j3], self.igra.polozaj[i4][j4]]
                     tocke[0] += stirka.count(IGRALEC_R) / 4 / (10-self.igra.odstranjeni[0])
                     tocke[1] += stirka.count(IGRALEC_Y) / 4 / (10-self.igra.odstranjeni[1])
-                razlika = (self.igra.odstranjeni[0] - self.igra.odstranjeni[1]) * AlphaBeta.ZMAGA / 10
+                vrednost_razlike_ods = (self.igra.odstranjeni[0] - self.igra.odstranjeni[1]) * 3 # Vrednost razlike odstranjenih
                 if self.jaz == IGRALEC_R:
-                    vrednost += (tocke[0] - delez*tocke[1]) * vrednost_stirke + razlika
+                    vrednost += (tocke[0] - delez*tocke[1] + vrednost_razlike_ods) * vrednost_tocke
                 elif self.jaz == IGRALEC_Y:
-                    vrednost += (tocke[1] - delez*tocke[0]) * vrednost_stirke - razlika
-                vrednost *= 0.984**(max(self.igra.stevilo_potez - 42, 0)) if vrednost > 0 else 1
-                return vrednost / 10
+                    vrednost += (tocke[1] - delez*tocke[0] - vrednost_razlike_ods) * vrednost_tocke
+                vrednost *= 0.984**(max(self.igra.stevilo_potez - 42, 0)) / 10
+                return vrednost
             else:
                 # Imamo normalno, popout ali powerup igro
                 # Pojdimo sedaj skozi vse možne zmagovalne štirke in jih
@@ -212,7 +210,6 @@ class AlphaBeta:
                 # Stirke, ki ze vsebujejo zetone obeh igralec so vredne 0 tock
                 # Prazne stirke so vredne 0.1 tocke
                 # Ostale so vredne a/4 tock, kjer je a stevilo zetonov znotraj stirke
-                tocke = [0, 0] # Sem bomo shranili stevilo tock igralcev [R,Y]
                 for s in self.igra.stirke:
                     ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
                     stirka = [self.igra.polozaj[i1][j1], self.igra.polozaj[i2][j2],
@@ -237,12 +234,11 @@ class AlphaBeta:
                     else:
                         # V štirki so rumene in rdeče
                         continue
-                    
-            (dos1, dos2) = tocke
+            
             if self.jaz == IGRALEC_R:
-                vrednost += (dos1 - delez*dos2) / 69 * 0.1 * AlphaBeta.ZMAGA
+                vrednost += (tocke[0] - delez*tocke[1]) / 69 * 0.1 * AlphaBeta.ZMAGA
             else:
-                vrednost += (dos2 - delez*dos1) / 69 * 0.1 * AlphaBeta.ZMAGA
+                vrednost += (tocke[1] - delez*tocke[0]) / 69 * 0.1 * AlphaBeta.ZMAGA
             if isinstance(self.igra, Pop_logika):
                 k = 0.984**self.igra.stevilo_potez
             elif isinstance(self.igra, Powerup_logika):
@@ -250,10 +246,11 @@ class AlphaBeta:
             else:
                 k = 1 - self.igra.stevilo_potez / (2*6*7)
             vrednost *= k
-        return int(vrednost)
+        return vrednost
 
     def alphabeta(self, globina, alpha, beta, maksimiziramo):
-        '''Glavna metoda AlphaBeta.'''
+        '''Glavna metoda AlphaBeta.
+            Vrne zmagovalno potezo in njeno vrednost, če jo najde, sicer (None, 0).'''
         if self.prekinitev:
             # Sporočili so nam, da moramo prekiniti
             return (None, 0)
@@ -261,10 +258,7 @@ class AlphaBeta:
         (zmagovalec, stirka) = self.igra.stanje_igre()
         if zmagovalec in (IGRALEC_R, IGRALEC_Y, NEODLOCENO):
             if isinstance(self.igra, Pop10_logika):
-                if zmagovalec == self.jaz:
-                    k = 0.984**(max(self.igra.stevilo_potez - 42, 0))
-                else:
-                    k = 1
+                k = 0.984**(max(self.igra.stevilo_potez - 42, 0))
             elif isinstance(self.igra, Pop_logika):
                 k = 0.984**self.igra.stevilo_potez
             elif isinstance(self.igra, Powerup_logika):
@@ -272,7 +266,6 @@ class AlphaBeta:
             else:
                 k = 1 - self.igra.stevilo_potez / (2*6*7)
             # Igre je konec, vrnemo njeno vrednost
-            self.k = k # začasno
             if zmagovalec == self.jaz:
                 return (None, AlphaBeta.ZMAGA * k)
             elif zmagovalec == nasprotnik(self.jaz):
@@ -281,7 +274,6 @@ class AlphaBeta:
                 return (None, 0)
         elif zmagovalec == NI_KONEC:
             # Igre ni konec
-            igralec = self.igra.na_potezi
             if globina == 0:
                 return (None, self.vrednost_pozicije())
             else:

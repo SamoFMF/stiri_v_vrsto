@@ -5,7 +5,7 @@ from logika import *
 ########################
 
 class Five_logika(Logika):
-    # Tabela vseh možnih zmagovalnih kombinacij 4 v vrsto
+    # Tabela vseh možnih zmagovalnih kombinacij, kjer potrebujemo 4 v vrsto
     stirke_R = [
         [(0,1), (1,2), (2,3), (3,4)],
         [(0,3), (1,2), (2,1), (3,0)],
@@ -26,6 +26,7 @@ class Five_logika(Logika):
         else:
             stirke_Y.append([(0,i), (1,i), (2,i), (3,i)])
             stirke_R.append([(3,i), (4,i), (5,i), (6,i)])
+    # Tabela vseh možnih zmagovalnih kombinacij, kjer potrebujemo 5 v vrsto
     petke = []
     for i in range(7):
         for j in range(2): # Navpične
@@ -49,23 +50,21 @@ class Five_logika(Logika):
     
     def stanje_igre(self):
         '''Vrne nam trenutno stanje igre. Možnosti so:
-            - (IGRALEC_R, stirka), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
-            - (IGRALEC_Y, stirka), če je igre konec in je zmagal IGRALEC_Y z dano zmagovalno štirko,
+            - (IGRALEC_R, [stirka]), če je igre konec in je zmagal IGRALEC_R z dano zmagovalno štirko,
+            - (IGRALEC_Y, [stirka]), če je igre konec in je zmagal IGRALEC_Y z dano zmagovalno štirko,
             - (NEODLOCENO, None), če je igre konec in je neodločeno,
             - (NI_KONEC, None), če je igra še vedno v teku.'''
         # Najprej preverimo, če obstaja kakšna zmagovalna štirka
-        for s in Five_logika.stirke_R:
+        for s in Five_logika.stirke_R: # Štirke, ki jih lahko doseže rdeči igralec
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
-            barva = self.polozaj[i1][j1]
-            if (barva == IGRALEC_R) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
+            if IGRALEC_R == self.polozaj[i1][j1] == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]:
                 # s je naša zmagovalna štirka
-                return (barva, [s])
-        for s in Five_logika.stirke_Y:
+                return (IGRALEC_R, [s])
+        for s in Five_logika.stirke_Y: # Štirke, ki jih lahko doseže rumeni igralec
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4)) = s
-            barva = self.polozaj[i1][j1]
-            if (barva == IGRALEC_Y) and (barva == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]):
+            if IGRALEC_Y == self.polozaj[i1][j1] == self.polozaj[i2][j2] == self.polozaj[i3][j3] == self.polozaj[i4][j4]:
                 # s je naša zmagovalna štirka
-                return (barva, [s])
+                return (IGRALEC_Y, [s])
         # Preverimo še sedaj, če obstaja zmagovalna petka
         for p in Five_logika.petke:
             ((i1,j1),(i2,j2),(i3,j3),(i4,j4), (i5,j5)) = p

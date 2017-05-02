@@ -93,12 +93,20 @@ class Pop10_logika(Logika):
         else:
             # Igra se je zaključila
             self.na_potezi = None
-        self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
+        #self.zadnja = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
         return (zmagovalec, stirka, (p-1,j), osvezi) # (p-1,j) nas ne zanima, ko je osvezi == 1, torej pri edinem primeru, kjer to ni pravi zapis (self.faza = 1)
 
     def razveljavi(self, i=1):
-        '''Razveljavi potezo in se vrne v prejšnje stanje.'''
+        '''Razveljavi potezo in se vrne v prejšnje stanje.
+            Uspe razveljaviti -> vrne prejšnje stanje, None sicer.'''
         if self.stevec > i-1:
+            # Zgodovina je dovolj globoka, da gremo 'i' korakov nazaj
+            if self.stevec == len(self.zgodovina):
+                # Smo bili na koncu zgodovine, ki pa ne hrani trenutnega stanja
+                # Zato si ga shranimo v self.zadnja_poteza
+                # TODO
+                self.zadnja_poteza = ([self.polozaj[i][:] for i in range(7)], self.na_potezi,
+                                      self.faza, [i for i in self.odstranjeni])
             self.stevec -= i
             (self.polozaj, self.na_potezi, self.faza, self.odstranjeni) = self.zgodovina[self.stevec]
             self.stevilo_potez -= i
@@ -127,11 +135,16 @@ class Pop10_logika(Logika):
         elif self.odstranjeni[1] == 10:
             # Zmagal je rumeni
             return (IGRALEC_Y, None)
+        elif self.stevilo_potez > 42 + MAKSIMALNO_STEVILO_POTEZ:
+            # Igra se ni zaključila v maksimalnem številu dovoljenih potez, kjer le-te
+            # začnemo šteti šele, ko se zaključi faza 0
+            return (NEODLOCENO, None)
         else:
             return (NI_KONEC, None)
 
     def uveljavi(self, i=1):
         '''Uveljavi zadnjo razveljavljeno potezo in se vrne v njeno stanje.'''
+        # TODO
         if self.stevec < len(self.zgodovina)-i:
             self.stevec += i
             (self.polozaj, self.na_potezi, self.faza, self.odstranjeni) = self.zgodovina[self.stevec]
@@ -146,30 +159,27 @@ class Pop10_logika(Logika):
             return None
 
     def veljavne_poteze(self):
+        '''Vrne seznam veljavnih potez.'''
+        poteze = []
         if self.faza == 0:
             # Smo v fazi dodajanja žetonov
 
             # Najprej preverimo v katero vrstico vstavljamo žetone
             vrstica = None
-            for v in range(6):
-                for (s,a) in enumerate(self.polozaj):
-                    if a[v] == PRAZNO:
-                        vrstica = v
-                        break
-                if vrstica is not None:
-                    break
+            for stolpec in range(7):
+                v = self.vrstica(stolpec)
+                if v is None:
+                    continue
+                elif vrstica is None or v < vrstica:
+                    vrstica = v
             assert (vrstica is not None), 'Smo v fazi "0", ko bi morali biti v fazi "1"'
 
             # Dodajmo sedaj proste poteze
-            poteze = []
             for i in range(7):
                 if self.polozaj[i][vrstica] == PRAZNO:
                     poteze.append(i+1)
-            return poteze
         elif self.faza == 1:
             # Smo v fazi odstranjevanja žetonov
-
-            poteze = []
             for (i,a) in enumerate(self.polozaj):
                 for (j,b) in enumerate(a):
                     if b == self.na_potezi:
@@ -183,18 +193,15 @@ class Pop10_logika(Logika):
                             # Ta poteza nas postavi v fazo 2
                             # Poteze so označene z 51-92
                             poteze.append(i+51+7*j)
-            return poteze
         else:
             # Smo v fazi dodajanja žetona na vrh
-            
-            poteze = []
             for (i,a) in enumerate(self.polozaj):
                 if a[-1] == PRAZNO:
                     poteze.append(i+1)
-            return poteze
+        return poteze
 
     def znotraj_stirke(self, x, y):
-        '''Pove, če je žeton na (x,y) položaju v kakšni štirki.'''
+        '''Vrne True, če je žeton na (x,y) položaju v kakšni štirki, False sicer.'''
         # Funkcija bo vrnila True, če je žeton (x,y) znotraj
         # kake štirke in False sicer
         for s in Logika.stirke:

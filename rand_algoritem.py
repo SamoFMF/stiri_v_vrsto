@@ -27,7 +27,6 @@ class Rand_alg():
 
         # Poženemo metodo za iskanje poteze
         poteza = self.rand_algoritem()
-        print('igralec = {0}, poteza = {1}'.format(self.jaz, poteza))
         self.jaz = None
         self.igra = None
         
