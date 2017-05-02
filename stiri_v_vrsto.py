@@ -779,7 +779,7 @@ class Gui():
                 # Lahko, da je naslednja računalnikova poteza bila dvojna, ali pa igre več ni
                 koliko_naprej = 0 # Pove, koliko potez moramo iti naprej, da bo ponovno na potezi človek, ali pa bo konec igre
                 # Najprej pa nas zanima, kje v zgodovini se sploh nahajamo
-                prihodnost = self.igra.zgodovina[self.igra.stevec+1:] + [self.igra.zadnja]
+                prihodnost = self.igra.zgodovina[self.igra.stevec+1:] + [self.igra.zadnja_poteza]
                 for prih in prihodnost:
                     koliko_naprej += 1
                     if prih[1] == IGRALEC_Y:
@@ -793,7 +793,7 @@ class Gui():
                 # Lahko, da je naslednja računalnikova poteza bila dvojna, ali pa igre več ni
                 koliko_naprej = 0 # Pove, koliko potez moramo iti naprej, da bo ponovno na potezi človek, ali pa bo konec igre
                 # Najprej pa nas zanima, kje v zgodovini se sploh nahajamo
-                prihodnost = self.igra.zgodovina[self.igra.stevec+1:] + [self.igra.zadnja]
+                prihodnost = self.igra.zgodovina[self.igra.stevec+1:] + [self.igra.zadnja_poteza]
                 for prih in prihodnost:
                     koliko_naprej += 1
                     if prih[1] == IGRALEC_Y:

@@ -115,7 +115,6 @@ class Logika():
             if self.stevec == len(self.zgodovina):
                 # Smo bili na koncu zgodovine, ki pa ne hrani trenutnega stanja
                 # Zato si ga shranimo v self.zadnja_poteza
-                # TODO
                 self.zadnja_poteza = ([self.polozaj[i][:] for i in range(7)], self.na_potezi)
             self.stevec -= i
             (self.polozaj, self.na_potezi) = self.zgodovina[self.stevec]
@@ -158,7 +157,6 @@ class Logika():
     def uveljavi(self, i=1):
         '''Uveljavi zadnjo razveljavljeno potezo in se vrne v njeno stanje.
             Uspe uveljaviti -> vrne novo stanje, None sicer.'''
-        # TODO
         if self.stevec < len(self.zgodovina)-i:
             self.stevec += i
             (self.polozaj, self.na_potezi) = self.zgodovina[self.stevec]
