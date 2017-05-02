@@ -241,9 +241,10 @@ class Gui():
         # Narišemo stransko platno, kjer bodo podatki o trenutni igri
         self.platno_menu = tkinter.Canvas(self.stranski_menu,
                                           width=Gui.SIRINA_PLATNO_MENU,
-                                          height=Gui.VISINA_PLATNO_MENU)
-        self.platno_menu.config(bg=Gui.BG_BARVA)
-        self.platno_menu.grid(row=0, column=0, columnspan=4, sticky=tkinter.NW)
+                                          height=Gui.VISINA_PLATNO_MENU,
+                                          borderwidth=0,
+                                          bg=Gui.BG_BARVA)
+        self.platno_menu.grid(row=0, column=0, columnspan=4, sticky=tkinter.N)
 
         # Dodamo možnosti
         pad_y = (MIN_VISINA - Gui.VISINA_PLATNO_MENU) * 0.02 # pady vrednost
@@ -304,17 +305,16 @@ class Gui():
                                            'bold'),
                                 width='8', borderwidth='0', justify='center',
                                 textvariable=self.ime_r)
+        self.platno_ime_r.place(x=0.26*Gui.SIRINA_PLATNO_MENU, y=2*Gui.ODMIK, anchor=tkinter.N,
+                                width=Gui.SIRINA_PLATNO_MENU/2 - Gui.ODMIK)
         # Ustvarimo widget za ime rumenega igralca
         self.platno_ime_y = tkinter.Entry(master, fg='yellow', bg=Gui.BG_BARVA,
                                 font=('Helvetica', '{0}'.format(velikost_pisave_ime),
                                            'bold'),
                                 width='8', borderwidth='0', justify='center',
                                 textvariable=self.ime_y)
-        
-        self.platno_menu.create_window(Gui.SIRINA_PLATNO_MENU / 4, 2 * Gui.ODMIK, anchor=tkinter.N, window=self.platno_ime_r)
-        
-        self.platno_menu.create_window(3 * Gui.SIRINA_PLATNO_MENU / 4, 2 * Gui.ODMIK,
-                                       anchor=tkinter.N, window=self.platno_ime_y)
+        self.platno_ime_y.place(x=0.76*Gui.SIRINA_PLATNO_MENU, y=2*Gui.ODMIK, anchor=tkinter.N,
+                                width=Gui.SIRINA_PLATNO_MENU/2 - Gui.ODMIK)
         # Pričnemo igro
         self.zacni_igro(nova=True)
 
