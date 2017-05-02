@@ -302,13 +302,13 @@ class Gui():
         self.platno_ime_r = tkinter.Entry(master, fg='red', bg=Gui.BG_BARVA,
                                 font=('Helvetica', '{0}'.format(velikost_pisave_ime),
                                            'bold'),
-                                width='10', borderwidth='0', justify='center',
+                                width='8', borderwidth='0', justify='center',
                                 textvariable=self.ime_r)
         # Ustvarimo widget za ime rumenega igralca
         self.platno_ime_y = tkinter.Entry(master, fg='yellow', bg=Gui.BG_BARVA,
                                 font=('Helvetica', '{0}'.format(velikost_pisave_ime),
                                            'bold'),
-                                width='10', borderwidth='0', justify='center',
+                                width='8', borderwidth='0', justify='center',
                                 textvariable=self.ime_y)
         
         self.platno_menu.create_window(Gui.SIRINA_PLATNO_MENU / 4, 2 * Gui.ODMIK, anchor=tkinter.N, window=self.platno_ime_r)
