@@ -88,7 +88,10 @@ class Pop_logika(Logika):
             return (NEODLOCENO, stirke)
         # Če zmagovalca ni, moramo preveriti, če je igre konec
         poteze = self.veljavne_poteze()
-        if len(poteze) > 0:
+        if self.stevilo_potez > MAKSIMALNO_STEVILO_POTEZ:
+            # Presegli smo največje dovoljeno število potez
+            return (NEODLOCENO, None)
+        elif len(poteze) > 0:
             # Obstaja še vsaj 1 veljavna poteza
             return (NI_KONEC, None)
         else:
