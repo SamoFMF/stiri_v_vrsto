@@ -247,7 +247,6 @@ class Gui():
                                           borderwidth=0,
                                           bg=Gui.BG_BARVA)
         self.platno_menu.grid(row=0, column=0, columnspan=4, sticky=tkinter.N)
-        self.doloci_velikost_pisave()
 
         # Dodamo možnosti
         pad_y = (MIN_VISINA - Gui.VISINA_PLATNO_MENU) * 0.02 # pady vrednost
@@ -306,24 +305,38 @@ class Gui():
         self.platno_ime_r = tkinter.Entry(master, fg='red', bg=Gui.BG_BARVA,
                                 font=('Helvetica', '{0}'.format(velikost_pisave_ime),
                                            'bold'),
-                                width='8', borderwidth='0', justify='center',
+                                width='10', borderwidth='0', justify='center',
                                 textvariable=self.ime_r)
-        self.platno_ime_r.place(x=0.26*Gui.SIRINA_PLATNO_MENU, y=2*Gui.ODMIK, anchor=tkinter.N,
-                                width=Gui.SIRINA_PLATNO_MENU/2 - Gui.ODMIK)
+        
         # Ustvarimo widget za ime rumenega igralca
         self.platno_ime_y = tkinter.Entry(master, fg='yellow', bg=Gui.BG_BARVA,
                                 font=('Helvetica', '{0}'.format(velikost_pisave_ime),
                                            'bold'),
-                                width='8', borderwidth='0', justify='center',
+                                width='10', borderwidth='0', justify='center',
                                 textvariable=self.ime_y)
-        self.platno_ime_y.place(x=0.76*Gui.SIRINA_PLATNO_MENU, y=2*Gui.ODMIK, anchor=tkinter.N,
-                                width=Gui.SIRINA_PLATNO_MENU/2 - Gui.ODMIK)
+
+        self.ime_r_widget = self.platno_menu.create_window(Gui.SIRINA_PLATNO_MENU / 4, 2 * Gui.ODMIK, anchor=tkinter.N, window=self.platno_ime_r)
+        
+        self.ime_y_widget = self.platno_menu.create_window(3 * Gui.SIRINA_PLATNO_MENU / 4, 2 * Gui.ODMIK,
+                                                           anchor=tkinter.N, window=self.platno_ime_y)
+
+        # Uredimo velikosti vseh uporabljenih pisav
+        self.doloci_velikost_pisave(velikost_pisave_ime)
+        
         # Pričnemo igro
         self.zacni_igro(nova=True)
 
-    def doloci_velikost_pisave(self):
-        '''Določi self.velikost_pisave.'''
-        # Ker je text centriran, je simetričen in lahko prevelimo glede na 1 stran
+    def doloci_velikost_pisave(self, velikost):
+        '''Določi self.velikost_pisave in velikost_pisave_ime.'''
+        # Najprej preverimo, če je velikost pisave za ime pravilna in jo primerno popravimo
+        velikost_pisave_ime = velikost
+        while self.ime_r_widget in self.platno_menu.find_overlapping(0, 0, Gui.SIRINA_PLATNO_MENU / 40, Gui.VISINA_PLATNO_MENU / 10):
+            velikost_pisave_ime -= 1
+            self.platno_ime_r.config(font=('Helvetica', '{0}'.format(velikost_pisave_ime), 'bold'))
+        self.platno_ime_y.config(font=('Helvetica', '{0}'.format(velikost_pisave_ime), 'bold'))
+
+        # Sedaj pa še določimo pisavo teksta, ki nam pove, kdo je na potezi itd.
+        # Ker je text centriran, je simetrično oddaljen od robov in lahko prevelimo glede na 1 stran
         x = 0.2 * Gui.SIRINA_PLATNO_MENU
         y = 0.5 * Gui.VISINA_PLATNO_MENU
         velikost_pisave = self.velikost_pisave
