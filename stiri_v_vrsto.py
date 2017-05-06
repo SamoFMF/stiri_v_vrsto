@@ -96,6 +96,10 @@ class Gui():
         self.ime_r.trace('w', lambda name, index, mode: self.uredi_ime(self.ime_r))
         self.ime_y.trace('w', lambda name, index, mode: self.uredi_ime(self.ime_y))
 
+        # Beležiti želimo tudi spremembe tipa igre, da bomo s pomočjo tega določili ime igralcev
+        self.tip_rdeci.trace('w', lambda name, index, mode: self.nastavi_ime_igralca(self.tip_rdeci.get(), IGRALEC_R))
+        self.tip_rumeni.trace('w', lambda name, index, mode: self.nastavi_ime_igralca(self.tip_rumeni.get(), IGRALEC_Y))
+
         # Dodajmo slike za igro Power Up
         # OPOZORILO:
         # Pri spreminjanju velikosti menuja je potrebno primerno prilagoditi tudi
@@ -615,6 +619,31 @@ class Gui():
                     self.rezultat[0] = int(self.rezultat[0])
                     self.rezultat[1] = int(self.rezultat[1])
         self.zacni_igro()
+
+    def nastavi_ime_igralca(self, tip, barva):
+        '''Metoda nastavi ime igralca.'''
+        if tip == 0:
+            ime = 'Rdeči' if barva == IGRALEC_R else 'Rumeni'
+        elif tip == 1:
+            ime = 'Random'
+        elif tip == 2:
+            ime = 'Lahek'
+        elif tip == 3:
+            ime = 'Srednji'
+        elif tip == 4:
+            ime = 'Težek'
+        elif tip == 5:
+            ime = 'Samo'
+        else:
+            # Ne bi smelo nikoli biti
+            ime = 'Napaka'
+        if barva == IGRALEC_R:
+            self.ime_r.set(ime)
+        elif barva == IGRALEC_Y:
+            self.ime_y.set(ime)
+        else:
+            # Ne bi smelo nikoli biti
+            pass
 
     def nova_igra(self):
         '''Ponastavi rezultat in začne novo igro.'''
