@@ -242,7 +242,6 @@ class Gui():
                                     borderwidth=Gui.OKVIR,
                                     bg=Gui.BG_BARVA)
         self.stranski_menu.pack(side=tkinter.LEFT, anchor=tkinter.NW)
-        self.stranski_menu.grid_propagate(0)
 
         # Narišemo stransko platno, kjer bodo podatki o trenutni igri
         self.platno_menu = tkinter.Canvas(self.stranski_menu,
@@ -331,7 +330,7 @@ class Gui():
         self.zacni_igro(nova=True)
 
     def doloci_velikost_pisave(self, velikost):
-        '''Določi self.velikost_pisave in velikost_pisave_ime.'''
+        '''Določi self.velikost_pisave in uredi velikost pisave za imena.'''
         # Najprej preverimo, če je velikost pisave za ime pravilna in jo primerno popravimo
         velikost_pisave_ime = velikost
         while self.ime_r_widget in self.platno_menu.find_overlapping(0, 0, Gui.SIRINA_PLATNO_MENU / 40, Gui.VISINA_PLATNO_MENU / 10):
