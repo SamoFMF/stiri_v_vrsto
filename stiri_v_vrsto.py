@@ -60,6 +60,8 @@ class Gui():
         self.velikost_gap = self.velikost_polja / 20 # Razdalja med okvirjem in figuro
         self.rezultat = [0, 0] # Trenutni rezultat
 
+        self.velikost_pisave = int(min(Gui.SIRINA_PLATNO_MENU * 0.0793, Gui.VISINA_PLATNO_MENU / 10)) # Velikost pisave (t.j. pri izpisih za to, kdo je na potezi, kdo je zmagal itd.)
+
         self.tip_rdeci = tkinter.IntVar() # Kakšen je rdeči - 0='človek',1='rac-rand',2='rac-easy',3='rac-med',4='rac-hard',5='rac_nepr'
         self.tip_rumeni = tkinter.IntVar() # Kot pri rdečem
 
@@ -245,6 +247,7 @@ class Gui():
                                           borderwidth=0,
                                           bg=Gui.BG_BARVA)
         self.platno_menu.grid(row=0, column=0, columnspan=4, sticky=tkinter.N)
+        self.doloci_velikost_pisave()
 
         # Dodamo možnosti
         pad_y = (MIN_VISINA - Gui.VISINA_PLATNO_MENU) * 0.02 # pady vrednost
@@ -318,6 +321,24 @@ class Gui():
         # Pričnemo igro
         self.zacni_igro(nova=True)
 
+    def doloci_velikost_pisave(self):
+        '''Določi self.velikost_pisave.'''
+        # Ker je text centriran, je simetričen in lahko prevelimo glede na 1 stran
+        x = 0.2 * Gui.SIRINA_PLATNO_MENU
+        y = 0.5 * Gui.VISINA_PLATNO_MENU
+        velikost_pisave = self.velikost_pisave
+        zacasni_tag = 'zacasno' # Tag začasnega texta, ki ga uporabimo za določanje velikosti pisave
+        self.zacasni_text = self.platno_menu.create_text(Gui.SIRINA_PLATNO_MENU / 2, Gui.VISINA_PLATNO_MENU / 2,
+                                                         text='Na potezi je',
+                                                         anchor=tkinter.CENTER,
+                                                         font=('Helvetica', '{0}'.format(velikost_pisave), 'bold'),
+                                                         tag=zacasni_tag)
+        while self.zacasni_text in self.platno_menu.find_overlapping(0, y-1, x, y+1):
+            velikost_pisave -= 1
+            self.platno_menu.itemconfig(self.zacasni_text, font=('Helvetica','{0}'.format(velikost_pisave), 'bold'))
+        self.velikost_pisave = velikost_pisave
+        self.platno_menu.delete(zacasni_tag)
+
     def odznaci_gumb(self):
         '''Deselecta gumb, če je le-ta že bil izbran in ponovno kliknjen.'''
         if self.pup.get() == self.pup_pomozni:
@@ -364,7 +385,7 @@ class Gui():
         '''Nariše spremenljive dele od platno_menu.'''
         self.platno_menu.delete(Gui.TAG_SPREMENLJIVI)
         dy = Gui.VISINA_PLATNO_MENU / 6 # Korak za y os
-        velikost_pisave = int(min(Gui.SIRINA_PLATNO_MENU * 0.0793, Gui.VISINA_PLATNO_MENU / 10))
+        velikost_pisave = self.velikost_pisave
         self.platno_menu.create_text(Gui.SIRINA_PLATNO_MENU / 4, Gui.ODMIK+dy,
                                      text='{0}'.format(self.rezultat[0]),
                                      fill='white', anchor=tkinter.N,
@@ -521,8 +542,8 @@ class Gui():
                                                        '{0}'.format(velikost_navodil),
                                                        'bold'),
                                                  tag=Gui.TAG_SPREMENLJIVI)
-                                             
 
+                                                         
     def narisi_polozaj(self):
         '''Na igralno površino nariše trenutni položaj igre.'''
         self.platno.delete(Gui.TAG_FIGURA)
